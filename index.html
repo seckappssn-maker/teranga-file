@@ -639,6 +639,8 @@ async function boot(){
   if(!window.supabase){MODE='account';render();toast('Pas de connexion internet');return}
   SB=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'terangaFile.auth'}});
   if(c){CODE=c;MODE='public';
+    /* Page client ou écran TV : si on l'ajoute à l'écran d'accueil, l'icône doit rouvrir CETTE page (avec le code), pas la connexion */
+    try{const mf=document.querySelector('link[rel="manifest"]');if(mf)mf.remove()}catch(e){}
     if(q.get('ecran')){PUBV='ecran';ecrOn=true}
     else{const id=q.get('t'),k=q.get('k');if(id&&k){P.mine=[{code:c,id,token:k},...P.mine.filter(x=>x.id!==id)].slice(0,10);saveP();MOI=id;PUBV='ticket'}
       else{const m=P.mine.find(x=>x.code===c&&x.jour===new Date().toISOString().slice(0,10));if(m)MOI=m.id;PUBV='prendre'}}
