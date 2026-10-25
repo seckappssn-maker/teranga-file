@@ -17,6 +17,10 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Teranga File">
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
 <style>
@@ -419,7 +423,14 @@ function vAccueil(){
    <div class="grid2"><button class="btn alt" onclick="borneOn()">⛶ Plein écran</button><button class="btn ghost" onclick="qrAccueil()">QR code à afficher</button></div></section>`}
   ${ROLE==='accueil'?`<button class="btn alt" onclick="borneOn()">⛶ Plein écran</button>`:''}`}
 function svcBtns(){return `<div class="svcs">${S.svcs.map(s=>{const n=waiting([s.l]).length;return `<button class="svc" style="--c:${s.col}" onclick="unlockAudio();prendre('${s.l}')"><span class="l">${s.l}</span><b>${esc(s.nom)}</b><small>${n?n+' en attente':'Pas d\'attente'}</small></button>`}).join('')}</div>`}
-function borneOn(){borne=true;unlockAudio();try{const d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d)}catch(e){}toast('Plein écran : touchez la touche retour pour quitter')}
+function borneOn(){borne=true;unlockAudio();
+  if(fsOk()){pleinEcran();toast('Plein écran : touchez la touche retour pour quitter');return}
+  const ios=/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)&&'ontouchend' in document,app=window.navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+  modal(app?`<h2>Déjà en plein écran</h2><div class="muted">L'application est ouverte depuis l'écran d'accueil : la barre du navigateur est déjà cachée.</div><button class="btn" onclick="closeM()">OK</button>`
+   :`<h2>Plein écran sur ${ios?'iPhone / iPad':'cet appareil'}</h2><div class="muted">${ios?'Safari ne permet pas le plein écran depuis une page. Mettez l\'application sur l\'écran d\'accueil : elle s\'ouvrira ensuite sans barre, comme une vraie application.':'Ce navigateur ne permet pas le plein écran. Mettez l\'application sur l\'écran d\'accueil, ou utilisez le menu du navigateur.'}</div>
+   <div class="guide" style="background:transparent"><ol>${ios?'<li>Touchez le bouton <b>Partager</b> (le carré avec la flèche ↑).</li><li>Choisissez <b>Sur l\'écran d\'accueil</b>, puis <b>Ajouter</b>.</li><li>Ouvrez <b>Teranga File</b> depuis l\'icône : plus de barre en haut.</li>'
+     :'<li>Ouvrez le menu du navigateur (⋮ ou ≡).</li><li>Choisissez <b>Ajouter à l\'écran d\'accueil</b> ou <b>Plein écran</b>.</li>'}</ol></div>
+   <div class="muted" style="font-size:14px">Sur iPad, « Accès guidé » (Réglages › Accessibilité) bloque aussi la tablette sur l'application.</div><button class="btn" onclick="closeM()">OK</button>`)}
 function lienTicket(t){return isDemo()?BASE+'?ticket='+t.id:BASE+'?c='+CODE+'&t='+t.id+'&k='+(t.token||'')}
 const lienAccueil=()=>isDemo()?BASE+'?prendre=1':BASE+'?c='+CODE;
 const lienEcran=()=>BASE+'?ecran='+CODE;
