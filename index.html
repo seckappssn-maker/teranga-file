@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teranga File</title>
+<meta name="description" content="Tickets numérotés, appel au guichet, écran TV et suivi sur le téléphone : la file d'attente simple pour cliniques, banques, mairies, boutiques et salons au Sénégal.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Teranga File – la file d'attente sans bousculade">
+<meta property="og:description" content="Ticket papier ou sur le téléphone, appel au guichet avec la voix, écran TV. Pour cliniques, banques, mairies, services clients.">
+<meta property="og:url" content="https://seckappssn-maker.github.io/teranga-file/">
+<meta property="og:image" content="https://seckappssn-maker.github.io/teranga-file/copertina.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#3B2FB0">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Teranga File : app mobile en cartes + barre d'onglets en bas ; écran TV sombre et très lisible */
+:root{
+  --bg:#F5F5FA; --surface:#FFFFFF; --ink:#16152B; --muted:#5F5E77; --line:#E0DFEC;
+  --brand:#3B2FB0; --brand-soft:#ECEAFB; --ok:#1F7A4D; --ok-soft:#E2F3EA; --warn:#B45309; --warn-soft:#FDEEDC; --bad:#B42318; --bad-soft:#FCE6E4;
+  --on-brand:#FFFFFF;
+  --f-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#100F1C; --surface:#1A1930; --ink:#ECEBF7; --muted:#A3A1BE; --line:#2C2A47;
+  --brand:#9C93FF; --brand-soft:#25224A; --ok:#5FD39A; --ok-soft:#173326; --warn:#F5A65B; --warn-soft:#3A2814; --bad:#F48A80; --bad-soft:#3D1B19;
+  --on-brand:#100F1C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#100F1C; --surface:#1A1930; --ink:#ECEBF7; --muted:#A3A1BE; --line:#2C2A47;
+  --brand:#9C93FF; --brand-soft:#25224A; --ok:#5FD39A; --ok-soft:#173326; --warn:#F5A65B; --warn-soft:#3A2814; --bad:#F48A80; --bad-soft:#3D1B19;
+  --on-brand:#100F1C; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.45;font-variant-numeric:tabular-nums;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:24px}
+.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:10px}
+.top .tt{flex:1;min-width:0}
+.top b{display:block;font-family:var(--f-display);font-size:20px;color:var(--brand);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top small{color:var(--muted)}
+.demo{background:var(--warn-soft);color:var(--warn);font-weight:700;font-size:13px;border-radius:999px;padding:4px 10px;white-space:nowrap}
+main{max-width:1100px;margin:0 auto;padding:14px 16px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lbl{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.btn{border:0;border-radius:14px;padding:12px 16px;min-height:50px;font-weight:700;cursor:pointer;background:var(--brand);color:var(--on-brand);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn.alt{background:var(--brand-soft);color:var(--brand)}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.bad{background:var(--bad-soft);color:var(--bad)}
+.btn.full{width:100%}
+.btn.sm{min-height:40px;padding:8px 12px;font-size:15px}
+.btn:active{transform:scale(.98)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:700;cursor:pointer;min-height:42px}
+.chip.on{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:15px}
+input,select{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:12px;min-height:48px;width:100%}
+input:focus,select:focus{outline:2px solid var(--brand);outline-offset:1px}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+.nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:700;color:var(--muted);padding:6px 2px;border-radius:12px;cursor:pointer}
+.nav button.on{color:var(--brand);background:var(--brand-soft)}
+.nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:700;z-index:50;max-width:90vw;text-align:center}
+/* Accueil */
+.weblink{font-family:ui-monospace,Menlo,monospace;font-size:14px;background:var(--brand-soft);color:var(--brand);border-radius:12px;padding:10px 12px;word-break:break-all;text-align:center}
+.svcs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.svc{--c:var(--brand);border:0;border-radius:20px;background:var(--c);color:#fff;padding:18px 14px;min-height:140px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:8px;cursor:pointer;text-align:left;position:relative;overflow:hidden}
+.svc::after{content:"";position:absolute;right:-26px;bottom:-26px;width:96px;height:96px;border-radius:50%;background:#fff;opacity:.13}
+.svc .l{font-family:var(--f-display);font-weight:800;font-size:38px;line-height:1;background:#ffffff2e;border-radius:12px;padding:4px 12px}
+.svc b{font-size:19px;line-height:1.2}
+.svc small{font-weight:600;opacity:.9}
+.hero{background:linear-gradient(135deg,var(--brand),#6D28D9);color:#fff;border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:6px}
+.hero h1{font-size:clamp(24px,6vw,36px)}
+.hero p{margin:0;opacity:.9}
+/* Modal */
+.ov{position:fixed;inset:0;z-index:40;background:#0009;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:520px;max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.sheet>*{flex-shrink:0}
+@media (min-width:600px){.ov{align-items:center}.sheet{border-radius:24px}}
+.tk{border-radius:20px;padding:18px;color:#fff;background:var(--c,var(--brand));text-align:center;display:flex;flex-direction:column;gap:4px}
+.tk .num{font-family:var(--f-display);font-weight:800;font-size:clamp(56px,19vw,120px);line-height:1;white-space:nowrap}
+.tk .sv{font-weight:700;font-size:18px;opacity:.95}
+.qr{display:flex;gap:14px;align-items:center;border:1.5px dashed var(--line);border-radius:16px;padding:12px}
+.qr .q{width:112px;height:112px;flex:none;background:#fff;border-radius:10px;padding:6px;display:grid;place-items:center}
+.qr .q svg,.qr .q img{width:100%;height:100%}
+/* Guichet */
+.gcur{border-radius:22px;padding:18px;background:var(--c,var(--brand));color:#fff;display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center}
+.gcur .num{font-family:var(--f-display);font-weight:800;font-size:clamp(56px,19vw,130px);line-height:1;white-space:nowrap}
+.gcur.vide{background:var(--brand-soft);color:var(--brand)}
+.next{display:flex;flex-direction:column;gap:6px}
+.next div{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:8px 2px}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-weight:800;font-size:14px;background:var(--brand-soft);color:var(--brand)}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--c);display:inline-block}
+.bigbtn{min-height:76px;font-size:22px;border-radius:18px}
+.mini{border-radius:18px;background:#0D0B1E;color:#fff;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.mini .tv{flex:none;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#B7B3DA;writing-mode:vertical-rl;transform:rotate(180deg)}
+.mini .scr{flex:1;border-radius:12px;background:var(--c,#3B2FB0);padding:10px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.mini .scr b{font-family:var(--f-display);font-size:34px;line-height:1}
+.mini .scr span{background:#fff;color:var(--c,#3B2FB0);border-radius:10px;padding:2px 10px;font-family:var(--f-display);font-weight:800;font-size:20px}
+.guide{border:2px dashed var(--brand);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--brand-soft)}
+.guide ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;flex-direction:column;gap:8px}
+.opt button{text-align:left;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.opt button.on{border-color:var(--brand);background:var(--brand-soft)}
+.opt button small{color:var(--muted)}
+/* Mon ticket */
+.mt{border-radius:24px;padding:22px;color:#fff;background:var(--c,var(--brand));display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.mt .num{font-family:var(--f-display);font-weight:800;font-size:clamp(60px,20vw,150px);line-height:1;white-space:nowrap}
+.mt .big{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,6vw,32px)}
+.mt.call{animation:pulse 1s ease-in-out infinite alternate}
+@keyframes pulse{from{box-shadow:0 0 0 0 #FACC1500}to{box-shadow:0 0 0 14px #FACC1566}}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stat div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:2px}
+.stat b{font-family:var(--f-display);font-size:30px;line-height:1.1}
+.stat span{color:var(--muted);font-size:14px;font-weight:600}
+table{width:100%;border-collapse:collapse}
+td,th{text-align:left;padding:8px 4px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+td.n,th.n{text-align:right}
+.svrow{display:grid;grid-template-columns:52px 1fr 52px;gap:8px;align-items:center}
+.svrow .l{font-family:var(--f-display);font-weight:800;font-size:22px;color:#fff;border-radius:12px;height:48px;display:grid;place-items:center}
+/* Écran TV */
+.ecr{position:fixed;inset:0;z-index:30;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:2.2vmin;padding:2.4vmin 3vmin;color:#fff;overflow:hidden;
+  background:radial-gradient(ellipse 60% 55% at 85% 0%,#6D28D955,transparent 70%),radial-gradient(ellipse 50% 50% at 0% 100%,#0EA5E933,transparent 70%),#0D0B1E}
+.ecr-h{display:flex;align-items:center;gap:2vmin}
+.ecr-h h1{flex:1;min-width:0;font-size:clamp(22px,5vmin,76px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ecr-h h1 small{display:block;font-family:var(--f-body);font-size:.36em;font-weight:700;color:#B7B3DA;letter-spacing:.16em;text-transform:uppercase}
+.ecr-clk{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,4.6vmin,70px);color:#DDD9FF}
+.ecr-x{background:none;border:1px solid #ffffff2e;color:#ffffff99;border-radius:999px;padding:6px 14px;font-size:15px;cursor:pointer}
+.ecr-snd{background:#F59E0B;color:#1A1200;border:0;border-radius:999px;padding:8px 16px;font-weight:800;font-size:clamp(13px,1.8vmin,22px);cursor:pointer}
+.ecr-b{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:2.4vmin;min-height:0}
+.ecr-now{border-radius:3vmin;background:var(--c,#3B2FB0);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1vmin;padding:2vmin;text-align:center;position:relative;overflow:hidden}
+.ecr-now .k{font-weight:800;letter-spacing:.18em;text-transform:uppercase;font-size:clamp(14px,2.6vmin,40px);opacity:.9}
+.ecr-now .num{font-family:var(--f-display);font-weight:800;font-size:clamp(80px,26vmin,420px);line-height:.95}
+.ecr-now .g{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,8vmin,130px);background:#fff;color:var(--c,#3B2FB0);border-radius:2vmin;padding:.05em .45em;line-height:1.2}
+.ecr-now .sv{font-weight:700;font-size:clamp(14px,2.8vmin,42px);opacity:.92}
+.ecr-now.flash{animation:flash .55s ease-in-out 6 alternate}
+@keyframes flash{from{filter:brightness(1)}to{filter:brightness(1.35)}}
+.ecr-side{display:flex;flex-direction:column;gap:2vmin;min-height:0}
+.ecr-p{background:#1A1733;border:2px solid #ffffff1a;border-radius:3vmin;padding:2vmin 2.4vmin;display:flex;flex-direction:column;gap:1.2vmin;min-height:0;overflow:hidden}
+.ecr-p h2{font-size:clamp(18px,3.4vmin,52px);color:#C9C4FF}
+.ecr-last{display:flex;flex-direction:column;gap:1vmin}
+.ecr-last div{display:flex;align-items:center;justify-content:space-between;gap:2vmin;background:#ffffff0d;border-radius:1.6vmin;padding:.8vmin 1.6vmin;font-family:var(--f-display);font-weight:800;font-size:clamp(20px,4.4vmin,70px)}
+.ecr-last div span{font-size:.6em;color:#C9C4FF}
+.ecr-last div i{font-style:normal;width:1.4vmin;align-self:stretch;border-radius:1vmin;background:var(--c)}
+.ecr-wait{display:flex;flex-direction:column;gap:1vmin}
+.ecr-wait div{display:flex;align-items:center;gap:1.6vmin;font-size:clamp(14px,2.8vmin,42px);font-weight:700}
+.ecr-wait div b{margin-left:auto;font-family:var(--f-display);font-size:1.25em}
+.ecr-wait .dot{width:2vmin;height:2vmin}
+.ecr-demo{background:#F59E0B;color:#1A1200;border:0;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap}
+.ecr-f{display:flex;align-items:center;justify-content:center;gap:2vmin;color:#B7B3DA;font-size:clamp(14px,2.6vmin,38px);font-weight:600;text-align:center}
+.ecr-f b{color:#fff}
+@media (orientation:portrait){.ecr-b{grid-template-columns:1fr;grid-template-rows:minmax(0,1.2fr) minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* Impression ticket 58 mm */
+#print{display:none}
+@media print{
+  @page{size:58mm auto;margin:2mm}
+  body{padding:0;background:#fff}
+  body>*:not(#print){display:none!important}
+  #print{display:block;width:54mm;font:12px/1.35 "Courier New",monospace;color:#000;text-align:center}
+  #print .xxl{font:700 40px/1.05 Arial,sans-serif;margin:4px 0}
+  #print hr{border:0;border-top:1px dashed #000;margin:5px 0}
+  #print img{width:30mm;height:30mm}
+  body.p80 #print{width:76mm;font-size:14px} body.p80 #print .xxl{font-size:56px}
+}
+</style>
+</head>
+<body>
+<header class="top" id="top">
+  <div class="tt"><b id="hNom">Teranga File</b><small id="hDate"></small></div>
+  <span class="demo" id="demoTag">Démo</span>
+  <button class="btn sm alt" id="roleBtn" onclick="roleMenu()" hidden></button>
+  <button class="btn sm ghost" id="sonBtn" onclick="toggleSon()" aria-label="Son">🔊</button>
+</header>
+<main id="view"></main>
+<nav class="nav" id="nav"></nav>
+<div id="ovWrap"></div>
+<div id="print"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" onerror="var x=document.createElement('script');x.src='https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';document.head.appendChild(x)"></script>
+<script>
+/* ---------- Outils ---------- */
+const $=id=>document.getElementById(id);
+const pad=(n,l=2)=>String(n).padStart(l,'0');
+const dk=d=>{const x=new Date(d);return x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate())};
+const hm=d=>{const x=new Date(d);return pad(x.getHours())+':'+pad(x.getMinutes())};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const JOURS=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const COLS=['#3B2FB0','#0F766E','#B45309','#BE185D','#1D4ED8','#4D7C0F'];
+const LETTRES='ABCDEF';
+const KEY='terangaFile_demo',PREF='terangaFile_prefs';
+const SUPA_URL='https://ncsjgmkrsvtwklfrdbgy.supabase.co',SUPA_KEY='sb_publishable_oDE4BbU6J3RTnce1Oo91cQ_hokWgh0U',MAIL_DOM='@terangafile.app';
+const SUPPORT_WA='221778790006',SUPPORT_NAME='Seck Apps';
+const BASE=location.href.split(/[?#]/)[0];
+const PRESETS={
+  clinique:{t:'🏥 Clinique / hôpital',nom:'Clinique Teranga',svcs:['Consultation','Caisse / Paiement','Analyses','Pharmacie']},
+  banque:{t:'🏦 Banque',nom:'Agence Teranga',svcs:['Dépôt / Retrait','Wave / Orange Money','Ouverture de compte','Conseiller']},
+  transfert:{t:'📱 Point Wave / OM',nom:'Point Wave / Orange Money',svcs:['Dépôt','Retrait','Envoi d\'argent','Paiement de factures']},
+  mairie:{t:'🏛️ Mairie',nom:'Mairie de Teranga',svcs:['État civil','Légalisation','Renseignements']},
+  service:{t:'📞 Service client',nom:'Service client Teranga',svcs:['Réclamation','Paiement facture','Nouvel abonnement']},
+  autre:{t:'✳️ Autre',nom:'Mon établissement',svcs:['Accueil','Caisse']}};
+const svcsDe=k=>PRESETS[k].svcs.map((n,i)=>({l:LETTRES[i],nom:n,col:COLS[i]}));
+const tnum=t=>t.svc+'-'+pad(t.n,3);
+const parle=t=>t.svc+' '+t.n;
+
+/* ---------- Modes ----------
+   demo   : tout dans ce téléphone (sans compte)
+   owner  : compte de l'établissement ; chaque appareil choisit son rôle (accueil, guichet, écran, responsable)
+   public : sans compte — client avec le QR code (prendre / ticket) ou écran TV par lien */
+let MODE='boot',SB=null,USER=null,CODE='',ROLE='',PUBV='',MOI=null,authMode='login';
+let P={son:true,g:{n:1,svcs:null},role:'',mine:[]};
+function loadP(){try{P={...P,...JSON.parse(localStorage.getItem(PREF)||'{}')}}catch(e){}}
+function saveP(){try{localStorage.setItem(PREF,JSON.stringify(P))}catch(e){}}
+const isDemo=()=>MODE==='demo';
+
+/* ---------- Données ---------- */
+let S=null;
+const emptyS=()=>({set:{nom:'Teranga File',guichets:2,son:true,imp:'bouton',larg:58},svcs:svcsDe('autre'),tk:[],mine:[],g:{n:1,svcs:['A','B']}});
+function seed(){
+  const now=Date.now(),m=x=>new Date(now-x*60000).toISOString();
+  const svcs=svcsDe('clinique').slice(0,3);
+  const tk=[];const add=(svc,n,ago,st,g,callAgo,finAgo)=>tk.push({id:uid(),svc,n,t:m(ago),st,g:g||0,tc:callAgo!=null?m(callAgo):null,tf:finAgo!=null?m(finAgo):null});
+  for(let i=1;i<=9;i++)add('A',i,150-i*12,'fini',1+(i%2),140-i*12,132-i*12);
+  add('A',10,40,'absent',1,30,29);add('A',11,34,'appel',1,3);add('A',12,28,'attente');add('A',13,20,'attente');add('A',14,12,'attente');add('A',15,5,'attente');
+  for(let i=1;i<=5;i++)add('B',i,120-i*15,'fini',2,112-i*15,108-i*15);
+  add('B',6,25,'appel',2,1);add('B',7,14,'attente');add('B',8,6,'attente');
+  add('C',1,90,'fini',3,80,70);add('C',2,50,'fini',3,40,31);add('C',3,9,'attente');
+  return{v:1,demo:true,set:{nom:PRESETS.clinique.nom+' (exemple)',guichets:3,son:true,imp:'bouton',larg:58},svcs,tk,mine:[],g:{n:1,svcs:['A','B','C']}};
+}
+function loadDemo(){try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){S=null}if(!S||!S.svcs)S=seed();if(!S.set.imp)S.set.imp='bouton';if(!S.set.larg)S.set.larg=58;
+  const lim=Date.now()-7*864e5;S.tk=S.tk.filter(t=>new Date(t.t).getTime()>lim)}
+function save(){if(isDemo()){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}else{P.son=S.set.son;P.g=S.g;saveP()}}
+const today=()=>isDemo()?S.tk.filter(t=>dk(t.t)===dk(new Date())):S.tk;
+const svcOf=l=>S.svcs.find(s=>s.l===l)||{l,nom:l,col:'#555'};
+const waiting=(ls)=>today().filter(t=>t.st==='attente'&&(!ls||ls.includes(t.svc))).sort((a,b)=>new Date(a.t)-new Date(b.t));
+const calls=()=>today().filter(t=>t.tc&&(t.st==='appel'||t.st==='fini'||t.st==='absent')).sort((a,b)=>new Date(b.tc)-new Date(a.tc));
+const curOf=g=>today().filter(t=>t.st==='appel'&&t.g===g).sort((a,b)=>new Date(b.tc)-new Date(a.tc))[0];
+function moyService(l){const L=today().filter(t=>t.svc===l&&t.st==='fini'&&t.tc&&t.tf);if(!L.length)return 5;
+  return Math.max(1,Math.round(L.reduce((s,t)=>s+(new Date(t.tf)-new Date(t.tc)),0)/L.length/60000))}
+function avant(t){return waiting([t.svc]).filter(x=>new Date(x.t)<new Date(t.t)).length}
+function estim(t){const n=avant(t);return n?Math.max(1,Math.round(n*moyService(t.svc)/Math.max(1,Math.min(S.set.guichets,2)))):0}
+const mapTk=r=>({id:String(r.id),svc:r.svc,n:r.n,st:r.st,g:r.g||0,t:r.t,tc:r.tc||null,tf:r.tf||null,rc:r.rc||0,token:r.token||'',web:!!r.web});
+function applyData(d){if(!d)return;S.set.nom=d.nom||S.set.nom;if(Array.isArray(d.svcs)&&d.svcs.length)S.svcs=d.svcs;if(d.guichets)S.set.guichets=+d.guichets;if(d.imp)S.set.imp=d.imp;if(d.larg)S.set.larg=+d.larg;
+  const L=S.svcs.map(s=>s.l);S.g.svcs=(S.g.svcs||[]).filter(x=>L.includes(x));if(!S.g.svcs.length)S.g.svcs=L;if(S.g.n>S.set.guichets)S.g.n=1}
+
+/* ---------- En ligne ---------- */
+let busy=false,lastSet=0,netErr=false;
+async function refresh(force){if(busy||!SB||MODE==='demo'||MODE==='boot'||MODE==='account')return;if(!force&&document.visibilityState==='hidden')return;busy=true;
+  try{if(MODE==='owner'){
+      if(force||Date.now()-lastSet>60000){const r=await SB.rpc('file_compte',{p_data:{}});if(r.error)throw r.error;CODE=r.data.code;applyData(r.data.data);lastSet=Date.now()}
+      const day=new Date().toISOString().slice(0,10);let all=[];
+      for(let from=0;;from+=1000){const r=await SB.from('file_tickets').select('id,svc,n,st,g,t,tc,tf,rc,web,token').eq('user_id',USER.id).eq('jour',day).order('t').range(from,from+999);
+        if(r.error)throw r.error;all=all.concat(r.data||[]);if(!r.data||r.data.length<1000)break}
+      S.tk=all.map(mapTk);
+    }else if(MODE==='public'){
+      const m=P.mine.find(x=>x.code===CODE&&x.id===MOI);
+      const r=await SB.rpc('file_etat',{p_code:CODE,p_id:m?+m.id:null,p_token:m?m.token:null});if(r.error)throw r.error;
+      if(!r.data||!r.data.ok){PUBV='inconnu'}else{applyData(r.data);S.tk=(r.data.tk||[]).map(mapTk);
+        if(r.data.moi){const mo=mapTk(r.data.moi);mo.mine=true;const i=S.tk.findIndex(x=>x.id===mo.id);if(i>=0)S.tk[i]=mo;else S.tk.push(mo)}}
+    }
+    netErr=false}
+  catch(e){netErr=true;console.warn(e)}
+  finally{busy=false}
+  softRender()}
+async function rpc(name,args){if(!SB)throw new Error('hors ligne');const r=await SB.rpc(name,args);if(r.error)throw r.error;return r.data}
+const errMsg=e=>/fetch|network|Failed/i.test(String(e&&e.message))?'Pas de connexion internet : réessayez':String(e&&e.message||e);
+
+/* ---------- Son : ding + voix ---------- */
+let audio=null,voixPrete=false;
+function unlockAudio(){try{if(!audio){const A=window.AudioContext||window.webkitAudioContext;if(A)audio=new A()}if(audio&&audio.state==='suspended')audio.resume();
+  if(window.speechSynthesis&&!voixPrete){const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);voixPrete=true}}catch(e){}}
+const audioOk=()=>!!(audio&&audio.state==='running');
+document.addEventListener('pointerdown',unlockAudio,{passive:true});
+function ding(){try{unlockAudio();if(!audio)return;const t0=audio.currentTime;[[740,0],[988,.22],[1318,.44]].forEach(([f,d])=>{const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=f;
+  g.gain.setValueAtTime(.0001,t0+d);g.gain.exponentialRampToValueAtTime(.45,t0+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.5);o.connect(g).connect(audio.destination);o.start(t0+d);o.stop(t0+d+.55)})}catch(e){}}
+function parler(txt){try{if(!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='fr-FR';
+  const v=speechSynthesis.getVoices().find(x=>/^fr/i.test(x.lang));if(v)u.voice=v;u.rate=.9;speechSynthesis.speak(u)}catch(e){}}
+function annonce(t){if(!S.set.son)return;ding();setTimeout(()=>parler(`Numéro ${parle(t)}. Guichet ${t.g}.`),1500)}
+function toggleSon(){S.set.son=!S.set.son;save();unlockAudio();render();toast(S.set.son?'Son activé':'Son coupé')}
+
+/* ---------- Actions ---------- */
+async function prendre(l){
+  if(isDemo()){const L=today().filter(t=>t.svc===l);const n=(L.reduce((m,t)=>Math.max(m,t.n),0))+1;
+    const t={id:uid(),svc:l,n,t:new Date().toISOString(),st:'attente',g:0,tc:null,tf:null};S.tk.push(t);S.mine.unshift(t.id);S.mine=S.mine.slice(0,10);save();render();ticketModal(t.id);if(S.set.imp==='auto')imprimer(t.id);return}
+  if(prendreBusy)return;prendreBusy=true;
+  try{const r=await rpc('file_prendre',{p_code:CODE,p_svc:l});
+    if(!r||!r.ok){toast(r&&r.raison==='trop'?'Trop de tickets en ce moment : réessayez dans quelques minutes':'Ticket impossible : réessayez');return}
+    const t=mapTk({...r,st:'attente',g:0});
+    if(MODE==='public'){P.mine=[{code:CODE,id:t.id,token:r.token,jour:new Date().toISOString().slice(0,10)},...P.mine.filter(x=>x.id!==t.id)].slice(0,10);saveP();
+      MOI=t.id;PUBV='ticket';try{history.replaceState(null,'',BASE+'?c='+CODE+'&t='+t.id+'&k='+r.token)}catch(e){}
+      S.tk.push({...t,mine:true});render();refresh(true);return}
+    S.tk.push(t);render();ticketModal(t.id);if(S.set.imp==='auto')imprimer(t.id);refresh(true)}
+  catch(e){toast(errMsg(e))}finally{prendreBusy=false}}
+let prendreBusy=false,gBusy=false;
+async function gAct(act){if(gBusy)return;gBusy=true;
+  try{const r=await rpc('file_guichet',{p_act:act,p_g:S.g.n,p_svcs:S.g.svcs});await refresh(true);
+    if(act==='suivant'||act==='absent'){if(r&&r.vide)toast('Personne en attente pour vos services');else if(r&&r.n){toast(`${r.svc}-${pad(r.n,3)} appelé au guichet ${S.g.n}`)}}
+    else if(act==='rappeler')toast('Rappelé');}
+  catch(e){toast(errMsg(e))}finally{gBusy=false}}
+function suivant(absent){if(!isDemo())return gAct(absent?'absent':'suivant');
+  const g=S.g.n,c=curOf(g),now=new Date().toISOString();
+  if(c){c.st=absent?'absent':'fini';c.tf=now}
+  const nx=waiting(S.g.svcs)[0];
+  if(!nx){save();render();toast(c?'Personne d\'autre en attente':'Personne en attente pour vos services');return}
+  nx.st='appel';nx.g=g;nx.tc=now;nx.rc=0;save();render();toast(`${tnum(nx)} appelé au guichet ${g}`)}
+function rappeler(){if(!isDemo())return gAct('rappeler');const c=curOf(S.g.n);if(!c)return;c.tc=new Date().toISOString();c.rc=(c.rc||0)+1;save();render();toast(`${tnum(c)} rappelé`)}
+function terminer(){if(!isDemo())return gAct('terminer');const c=curOf(S.g.n);if(!c)return;c.st='fini';c.tf=new Date().toISOString();save();render();toast(`${tnum(c)} terminé`)}
+async function pushSet(){if(isDemo()){save();return true}
+  try{const d=await rpc('file_save',{p_data:{nom:S.set.nom,svcs:S.svcs,guichets:S.set.guichets,imp:S.set.imp,larg:S.set.larg}});applyData(d);return true}catch(e){toast(errMsg(e));return false}}
+
+/* ---------- Écrans ---------- */
+let tab='accueil',sub=null,ecrOn=false;
+const IC={
+ accueil:'<svg viewBox="0 0 24 24"><path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M14 7v12" stroke-dasharray="2 2"/></svg>',
+ guichet:'<svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10h14v11M3 10l9-6 9 6"/><path d="M10 21v-5h4v5"/></svg>',
+ ecran:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+ ticket:'<svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>',
+ plus:'<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>'};
+const ROLES={accueil:['🎫','Accueil','Les clients touchent leur service et prennent un ticket.'],guichet:['🧑‍💼','Guichet','L\'agent appelle le client suivant.'],
+  ecran:['📺','Écran TV','La télé de la salle d\'attente : numéros appelés et voix.'],resp:['📊','Responsable','Tout voir : bilan, réglages, liens et QR codes.']};
+function tabsFor(){if(isDemo())return[['accueil','Accueil'],['guichet','Guichet'],['ecran','Écran TV'],['ticket','Mon ticket'],['plus','Bilan']];
+  if(MODE==='owner'&&ROLE==='resp')return[['accueil','Accueil'],['guichet','Guichet'],['ecran','Écran TV'],['plus','Bilan']];return[]}
+function go(x){tab=x;sub=null;if(x==='ecran'){ecrStart();return}render();scrollTo(0,0)}
+function render(){
+  const d=new Date();$('hNom').textContent=MODE==='account'||MODE==='boot'?'Teranga File':S.set.nom;
+  $('hDate').textContent=JOURS[d.getDay()]+' '+d.getDate()+'/'+pad(d.getMonth()+1)+' · '+hm(d)+(netErr&&!isDemo()?' · ⚠️ pas de connexion':'');
+  $('demoTag').hidden=!isDemo();$('sonBtn').textContent=S.set.son?'🔊':'🔇';$('sonBtn').hidden=MODE==='account'||MODE==='boot';
+  $('roleBtn').hidden=MODE!=='owner'||!ROLE;if(ROLE&&ROLES[ROLE])$('roleBtn').textContent=ROLES[ROLE][0]+' '+ROLES[ROLE][1]+' ▾';
+  const T=tabsFor();const ecr=(tab==='ecran'&&ecrOn)||(MODE==='public'&&PUBV==='ecran');
+  $('top').hidden=ecr;$('nav').hidden=ecr||T.length<2;document.body.style.paddingBottom=ecr||T.length<2?'24px':'';
+  $('nav').innerHTML=T.map(([k,l])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')">${IC[k]}${l}</button>`).join('');
+  let V;
+  if(MODE==='boot')V=`<section class="card" style="align-items:center;text-align:center;padding:40px 16px"><b>Teranga File</b><div class="muted">Chargement…</div></section>`;
+  else if(MODE==='account')V=vAccount();
+  else if(MODE==='public')V=PUBV==='inconnu'?`<section class="card"><h2>Lien inconnu</h2><div class="muted">Ce QR code ne correspond à aucun établissement. Demandez le bon code à l'accueil.</div></section>`
+     :PUBV==='ecran'?vEcran():PUBV==='ticket'?vTicket():vPrendre();
+  else if(MODE==='owner'&&!ROLE)V=vRole();
+  else V={accueil:vAccueil,guichet:vGuichet,ecran:vEcran,ticket:vTicket,plus:vPlus}[tab]();
+  $('view').innerHTML=V;
+  checkAnnonce();
+}
+function softRender(){const a=document.activeElement;if($('ovWrap').innerHTML||(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)))return;render()}
+let toastT=null;
+function toast(m){let el=document.querySelector('.toast');if(!el){el=document.createElement('div');el.className='toast';el.setAttribute('role','status');document.body.appendChild(el)}el.textContent=m;clearTimeout(toastT);toastT=setTimeout(()=>el.remove(),2800)}
+function modal(h){$('ovWrap').innerHTML=`<div class="ov" onclick="if(event.target===this)closeM()"><div class="sheet" role="dialog" aria-modal="true">${h}</div></div>`}
+function closeM(){$('ovWrap').innerHTML='';clearTimeout(bornT);render()}
+
+/* Compte : connexion / création */
+function vAccount(){const su=authMode==='signup';
+  return `<section class="hero"><h1>Teranga File</h1><p>La file d'attente sans bousculade : tickets, appel au guichet avec la voix, écran TV, suivi sur le téléphone du client.</p></section>
+  <section class="card"><div class="chips"><button class="chip ${su?'':'on'}" onclick="authMode='login';render()">Se connecter</button><button class="chip ${su?'on':''}" onclick="authMode='signup';render()">Créer un compte</button></div>
+   <form class="card" style="border:0;padding:0" onsubmit="event.preventDefault();doAuth()">
+    ${su?`<label class="f">Nom de l'établissement<input id="au_nom" autocomplete="organization" placeholder="Ex : Clinique Ndeye Fatou"></label>
+     <label class="f">Type<select id="au_type">${Object.entries(PRESETS).map(([k,p])=>`<option value="${k}">${p.t}</option>`).join('')}</select></label>`:''}
+    <label class="f">Numéro de téléphone du responsable<input id="au_tel" inputmode="tel" autocomplete="username" placeholder="77 000 00 00"></label>
+    <label class="f">Mot de passe<input id="au_pw" type="password" autocomplete="${su?'new-password':'current-password'}" placeholder="6 caractères minimum"></label>
+    ${su?'<label class="f">Répéter le mot de passe<input id="au_pw2" type="password" autocomplete="new-password"></label><div class="muted" style="font-size:14px">Notez bien le mot de passe : il sert pour connecter chaque appareil (accueil, guichets, écran).</div>':''}
+    <button class="btn full" type="submit" id="au_btn">${su?'Créer le compte':'Se connecter'}</button>
+    <div id="au_msg" style="color:var(--bad);font-weight:600"></div></form>
+   <button class="btn ghost full" onclick="startDemo()">Voir la démo (sans compte)</button></section>`}
+const phoneDigits=v=>{let d=String(v||'').replace(/\D/g,'');if(d.startsWith('00'))d=d.slice(2);if(d.length===9)d='221'+d;return d};
+async function doAuth(){const val=id=>($(id)||{}).value||'',ph=phoneDigits(val('au_tel')),pw=val('au_pw'),su=authMode==='signup',say=x=>{const m=$('au_msg');if(m)m.textContent=x};
+  if(ph.length<11)return say('Numéro de téléphone invalide');if(pw.length<6)return say('Le mot de passe doit avoir au moins 6 caractères');
+  if(su&&pw!==val('au_pw2'))return say('Les deux mots de passe ne sont pas pareils');
+  if(!SB)return say('Pas de connexion internet : réessayez');
+  const nom=su?val('au_nom').trim():'',type=su?val('au_type'):'';const b=$('au_btn');if(b){b.disabled=true;b.textContent='Connexion…'}say('');
+  try{const r=su?await SB.auth.signUp({email:ph+MAIL_DOM,password:pw}):await SB.auth.signInWithPassword({email:ph+MAIL_DOM,password:pw});
+    if(r.error)throw r.error;if(!r.data.session)throw new Error('Compte créé mais pas encore actif. Contactez '+SUPPORT_NAME+'.');
+    USER=r.data.session.user;
+    const p=PRESETS[type]||PRESETS.autre;const c=await rpc('file_compte',{p_data:su?{nom:nom||p.nom,svcs:svcsDe(type||'autre'),guichets:2}:{}});
+    CODE=c.code;S=emptyS();S.set.son=P.son!==false;if(P.g&&P.g.n)S.g={n:P.g.n,svcs:Array.isArray(P.g.svcs)?P.g.svcs:[]};applyData(c.data);lastSet=Date.now();
+    MODE='owner';ROLE=su?'resp':P.role||'';tab=ROLE==='guichet'?'guichet':ROLE==='ecran'?'ecran':su?'plus':'accueil';P.role=ROLE;saveP();
+    await refresh(true);render();toast(su?'Compte créé':'Connecté')}
+  catch(e){const msg=String(e&&e.message||'');render();const m2=$('au_msg');
+    if(m2)m2.textContent=/already|registered|exists/i.test(msg)?'Ce numéro a déjà un compte : touchez « Se connecter »':/invalid login|credentials/i.test(msg)?'Numéro ou mot de passe faux':errMsg(e)}}
+function startDemo(){MODE='demo';try{localStorage.setItem('terangaFile_mode','demo')}catch(e){}loadDemo();tab='accueil';render()}
+function exitDemo(){try{localStorage.removeItem('terangaFile_mode')}catch(e){}location.href=BASE}
+
+/* Rôle de cet appareil */
+function vRole(){return `<h2>Cet appareil sert pour…</h2><div class="muted">Chaque téléphone, tablette ou télé de l'établissement choisit son rôle. Vous pourrez changer plus tard.</div>
+  <div class="opt">${Object.entries(ROLES).map(([k,[i,t,d]])=>`<button onclick="setRole('${k}')"><b style="font-size:19px">${i} ${t}</b><small>${d}</small></button>`).join('')}</div>`}
+function setRole(r){ROLE=r;P.role=r;saveP();closeM();sub=null;if(r==='ecran'){go('ecran');return}tab=r==='guichet'?'guichet':r==='resp'?'plus':'accueil';render();scrollTo(0,0)}
+function roleMenu(){modal(`<h2>Cet appareil</h2><div class="opt">${Object.entries(ROLES).map(([k,[i,t,d]])=>`<button class="${ROLE===k?'on':''}" onclick="setRole('${k}')"><b>${i} ${t}</b><small>${d}</small></button>`).join('')}</div>
+  <button class="btn bad" onclick="logout()">Déconnecter cet appareil</button><button class="btn ghost" onclick="closeM()">Fermer</button>`)}
+async function logout(){try{await SB.auth.signOut()}catch(e){}P.role='';saveP();location.href=BASE}
+
+/* Accueil (tablette de l'établissement) */
+let borne=false,bornT=null;
+function vAccueil(){
+  return `${isDemo()?`<section class="guide"><b>Comment essayer la démo</b><ol>
+    <li><b>Ici (Accueil)</b> : touchez un service, comme un client. Vous recevez un numéro.</li>
+    <li><b>Guichet</b> : touchez <b>Suivant ▶</b>. Le numéro est appelé : vous entendez la voix et vous voyez le numéro sur l'écran.</li>
+    <li><b>Écran TV</b> : c'est ce que les clients voient sur la télé de la salle d'attente.</li>
+    <li><b>Mon ticket</b> : ce que le client voit sur son téléphone après avoir scanné le QR code.</li></ol>
+    <button class="btn ghost sm" onclick="exitDemo()">Quitter la démo · créer un compte</button></section>`:''}
+  <section class="hero"><h1>Bienvenue</h1><p>Touchez votre service pour prendre un ticket. Vous serez appelé à l'écran.</p></section>
+  ${svcBtns()}
+  ${ROLE==='accueil'?'':`<section class="card"><div class="lbl">Pour le responsable</div>
+   <div class="muted">Posez une tablette à l'entrée avec le rôle « Accueil ». Les clients touchent leur service : le ticket s'imprime, ou ils scannent le QR code pour suivre leur tour sur leur téléphone.</div>
+   <div class="grid2"><button class="btn alt" onclick="borneOn()">⛶ Plein écran</button><button class="btn ghost" onclick="qrAccueil()">QR code à afficher</button></div></section>`}
+  ${ROLE==='accueil'?`<button class="btn alt" onclick="borneOn()">⛶ Plein écran</button>`:''}`}
+function svcBtns(){return `<div class="svcs">${S.svcs.map(s=>{const n=waiting([s.l]).length;return `<button class="svc" style="--c:${s.col}" onclick="unlockAudio();prendre('${s.l}')"><span class="l">${s.l}</span><b>${esc(s.nom)}</b><small>${n?n+' en attente':'Pas d\'attente'}</small></button>`}).join('')}</div>`}
+function borneOn(){borne=true;unlockAudio();try{const d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d)}catch(e){}toast('Plein écran : touchez la touche retour pour quitter')}
+function lienTicket(t){return isDemo()?BASE+'?ticket='+t.id:BASE+'?c='+CODE+'&t='+t.id+'&k='+(t.token||'')}
+const lienAccueil=()=>isDemo()?BASE+'?prendre=1':BASE+'?c='+CODE;
+const lienEcran=()=>BASE+'?ecran='+CODE;
+function qrSvg(txt,cell=4){try{const q=qrcode(0,'M');q.addData(txt);q.make();return q.createSvgTag({cellSize:cell,margin:0,scalable:true})}catch(e){return '<span class="muted" style="font-size:12px">QR indisponible</span>'}}
+function qrImg(txt){try{const q=qrcode(0,'M');q.addData(txt);q.make();return q.createDataURL(4,0)}catch(e){return ''}}
+function ticketModal(id){const t=S.tk.find(x=>x.id===id);if(!t)return;const s=svcOf(t.svc),n=avant(t),e=estim(t);
+  modal(`<div class="tk" style="--c:${s.col}"><div class="sv">${esc(s.nom)}</div><div class="num">${tnum(t)}</div><div>${hm(t.t)} · ${n?`<b>${n}</b> personne${n>1?'s':''} avant vous · environ ${e} min`:'<b>Vous êtes le prochain</b>'}</div></div>
+   <div class="qr"><div class="q">${qrSvg(lienTicket(t))}</div><div><b>Suivez votre tour sur votre téléphone</b><div class="muted" style="font-size:14px">Scannez ce code : votre téléphone sonne quand c'est votre tour. Vous pouvez attendre dehors.</div></div></div>
+   ${S.set.imp==='non'?`<button class="btn" onclick="closeM()">OK</button>`:`<div class="grid2"><button class="btn alt" onclick="imprimer('${t.id}')">🖨️ ${S.set.imp==='auto'?'Réimprimer':'Imprimer'}</button><button class="btn" onclick="closeM()">OK</button></div>`}
+   ${isDemo()?'<div class="muted" style="font-size:13px">Démo : le QR code marche seulement sur ce téléphone. Avec un compte, il marche sur le téléphone de chaque client.</div>':''}`);
+  clearTimeout(bornT);if(borne||ROLE==='accueil')bornT=setTimeout(closeM,20000)}
+function imprimer(id){const t=S.tk.find(x=>x.id===id);if(!t)return;imprimer2(t)}
+function imprimer2(t){if(S.set.imp==='auto')return rawbt(t);printNormal(t)}
+function testImp(){imprimer2({id:'test',svc:S.svcs[0].l,n:0,t:new Date().toISOString(),st:'attente',token:''})}
+/* Impression directe sur imprimante ticket (Android + application gratuite RawBT) : commandes ESC/POS, sans fenêtre */
+const ascii=x=>String(x).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\x20-\x7E]/g,'');
+function escpos(t){const s=svcOf(t.svc),n=avant(t),w=S.set.larg===80?48:32,B=[];
+  const raw=(...a)=>a.forEach(x=>B.push(x)),txt=x=>{for(const c of ascii(x))B.push(c.charCodeAt(0))},nl=()=>B.push(10);
+  const line=()=>{txt('-'.repeat(w));nl()};
+  raw(0x1B,0x40,0x1B,0x61,1);
+  raw(0x1D,0x21,0x11);txt(S.set.nom.slice(0,w/2));nl();raw(0x1D,0x21,0);
+  txt(s.nom);nl();line();txt('Votre numero');nl();
+  raw(0x1D,0x21,0x33);txt(tnum(t));nl();raw(0x1D,0x21,0);
+  txt(new Date(t.t).toLocaleDateString('fr-FR')+' '+hm(t.t));nl();
+  txt(n?n+' personne'+(n>1?'s':'')+' avant vous':'Vous etes le prochain');nl();line();
+  const d=ascii(lienTicket(t)),L=d.length+3;
+  raw(0x1D,0x28,0x6B,4,0,0x31,0x41,0x32,0);raw(0x1D,0x28,0x6B,3,0,0x31,0x43,S.set.larg===80?7:5);raw(0x1D,0x28,0x6B,3,0,0x31,0x45,0x31);
+  raw(0x1D,0x28,0x6B,L%256,Math.floor(L/256),0x31,0x50,0x30);txt(d);raw(0x1D,0x28,0x6B,3,0,0x31,0x51,0x30);nl();
+  txt('Scannez pour suivre votre tour');nl();line();txt('Merci de patienter.');nl();txt("Regardez l'ecran.");nl();
+  raw(0x1B,0x64,4,0x1D,0x56,0x42,0);return B}
+function rawbt(t){const B=escpos(t);let bin='';B.forEach(b=>bin+=String.fromCharCode(b));const b64=btoa(bin);
+  if(!/android/i.test(navigator.userAgent)){toast('Impression directe : seulement sur Android avec RawBT. Impression normale…');return printNormal(t)}
+  location.href='intent:base64,'+b64+'#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;'}
+function printNormal(t){const s=svcOf(t.svc),n=avant(t),img=qrImg(lienTicket(t));
+  $('print').innerHTML=`<b>${esc(S.set.nom)}</b><br>${esc(s.nom)}<hr><div>Votre numéro</div><div class="xxl">${tnum(t)}</div><div>${new Date(t.t).toLocaleDateString('fr-FR')} ${hm(t.t)}</div><div>${n} personne${n>1?'s':''} avant vous</div><hr>${img?`<img src="${img}" alt=""><div>Scannez pour suivre votre tour</div><hr>`:''}<div>Merci de patienter.<br>Regardez l'écran.</div>`;
+  document.body.classList.toggle('p80',S.set.larg===80);setTimeout(()=>{try{window.print()}catch(e){}},60)}
+function qrAccueil(){const u=lienAccueil();
+  modal(`<h2>QR code de l'accueil</h2><div class="muted">Imprimez-le et collez-le au mur : le client scanne, choisit son service et reçoit son ticket sur son téléphone, sans papier.</div>
+   <div style="background:#fff;border-radius:16px;padding:16px;max-width:280px;margin:0 auto;width:100%">${qrSvg(u,6)}</div>
+   <div class="weblink">${esc(u)}</div>
+   <div class="grid2"><button class="btn alt" onclick="copier('${esc(u)}')">Copier le lien</button><button class="btn alt" onclick="printQR()">🖨️ Imprimer</button></div>
+   ${isDemo()?'<div class="muted" style="font-size:13px">Démo : ce code ouvre la démo. Avec un compte, il ouvre la page de votre établissement.</div>':''}
+   <button class="btn" onclick="closeM()">OK</button>`)}
+function printQR(){const img=qrImg(lienAccueil());$('print').innerHTML=`<b>${esc(S.set.nom)}</b><hr><div>Prenez votre ticket</div><div>avec votre téléphone</div>${img?`<img src="${img}" alt="" style="width:46mm;height:46mm">`:''}<div>Scannez, choisissez votre service.</div><div>Votre téléphone sonne quand c'est votre tour.</div>`;
+  document.body.classList.toggle('p80',S.set.larg===80);setTimeout(()=>{try{window.print()}catch(e){}},60)}
+function copier(x){try{navigator.clipboard.writeText(x).then(()=>toast('Lien copié'),()=>toast(x))}catch(e){toast(x)}}
+
+/* Page du client (QR code au mur) : choisir son service */
+function vPrendre(){const mt=monTicket();
+  return `${mt&&(mt.st==='attente'||mt.st==='appel')?`<section class="card" style="border-color:var(--brand)"><div class="row between"><span>Vous avez déjà le ticket <b>${tnum(mt)}</b></span><button class="btn sm" onclick="PUBV='ticket';render()">Voir</button></div></section>`:''}
+  <section class="hero"><h1>${esc(S.set.nom)}</h1><p>Choisissez votre service. Votre numéro arrive sur ce téléphone, et il sonne quand c'est votre tour.</p></section>
+  ${svcBtns()}<div class="muted" style="text-align:center;font-size:14px">Pas besoin de compte ni d'application.</div>`}
+
+/* Guichet : l'agent appelle le suivant */
+function vGuichet(){const g=S.g.n,c=curOf(g),W=waiting(S.g.svcs),s=c?svcOf(c.svc):null;
+  const depuis=c?Math.max(0,Math.round((Date.now()-new Date(c.tc))/60000)):0;
+  return `<div class="row between"><h2>Guichet ${g}</h2><span class="pill">${W.length} en attente</span></div>
+  <div class="chips">${Array.from({length:S.set.guichets},(_,i)=>i+1).map(n=>`<button class="chip ${n===g?'on':''}" onclick="S.g.n=${n};save();render()">Guichet ${n}</button>`).join('')}</div>
+  ${c?`<section class="gcur" style="--c:${s.col}"><div style="font-weight:700">En cours · ${esc(s.nom)}</div><div class="num">${tnum(c)}</div><div>Appelé à ${hm(c.tc)} · depuis ${depuis} min${c.rc?` · rappelé ${c.rc}×`:''}</div></section>`
+   :`<section class="gcur vide"><div style="font-weight:700">Personne au guichet</div><div style="font-size:18px">Touchez « Suivant » pour appeler le premier client.</div></section>`}
+  ${(()=>{const h=calls()[0];if(!h||h.st!=='appel')return '';const hs=svcOf(h.svc);return `<div class="mini" style="--c:${hs.col}"><span class="tv">Écran TV</span><div class="scr"><b>${tnum(h)}</b><span>Guichet ${h.g}</span></div></div>`})()}
+  <button class="btn ok bigbtn full" onclick="unlockAudio();suivant(false)">Suivant ▶</button>
+  ${c?`<div class="grid3"><button class="btn alt" onclick="rappeler()">🔁 Rappeler</button><button class="btn bad" onclick="suivant(true)">Absent</button><button class="btn ghost" onclick="terminer()">✓ Terminé</button></div>`:''}
+  <section class="card"><div class="lbl">Prochains</div><div class="next">${W.slice(0,6).map(t=>{const sv=svcOf(t.svc);return `<div><span class="row" style="gap:8px"><span class="dot" style="--c:${sv.col}"></span><b>${tnum(t)}</b> <span class="muted">${esc(sv.nom)}</span></span><span class="muted">${Math.max(0,Math.round((Date.now()-new Date(t.t))/60000))} min</span></div>`}).join('')||'<div class="muted">Personne en attente.</div>'}</div></section>
+  <section class="card"><div class="lbl">Services de ce guichet</div><div class="chips">${S.svcs.map(sv=>`<button class="chip ${S.g.svcs.includes(sv.l)?'on':''}" onclick="togSvc('${sv.l}')">${sv.l} · ${esc(sv.nom)}</button>`).join('')}</div>
+   <div class="muted" style="font-size:14px">« Suivant » appelle la personne qui attend depuis le plus longtemps parmi ces services.</div></section>`}
+function togSvc(l){const L=S.g.svcs,i=L.indexOf(l);if(i>=0){if(L.length===1)return toast('Gardez au moins un service');L.splice(i,1)}else L.push(l);save();render()}
+
+/* Écran TV */
+let wakeLk=null;
+function ecrStart(){ecrOn=true;unlockAudio();try{const d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d)}catch(e){}
+  wake();render();scrollTo(0,0)}
+function wake(){try{if(navigator.wakeLock&&!wakeLk&&document.visibilityState==='visible')navigator.wakeLock.request('screen').then(l=>{wakeLk=l;l.addEventListener('release',()=>wakeLk=null)}).catch(()=>{})}catch(e){}}
+function ecrStop(){ecrOn=false;try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}try{wakeLk&&wakeLk.release()}catch(e){}
+  if(MODE==='owner'&&ROLE==='ecran'){roleMenu();return}go(isDemo()||ROLE==='resp'?'guichet':'accueil')}
+function vEcran(){if(MODE!=='public'&&!ecrOn)return '';const C=calls(),h=C[0],s=h?svcOf(h.svc):null,d=new Date(),neuf=h&&Date.now()-new Date(h.tc)<6000;
+  return `<div class="ecr" onclick="unlockAudio();wake()">
+  <div class="ecr-h"><h1>${esc(S.set.nom)}<small>File d'attente</small></h1>
+   ${S.set.son&&!audioOk()?`<button class="ecr-snd" onclick="unlockAudio();render()">🔈 Touchez pour le son</button>`:''}
+   ${isDemo()?`<button class="ecr-demo" onclick="event.stopPropagation();demoAppel()">▶ Démo : appeler</button>`:''}<span class="ecr-clk">${hm(d)}</span>${MODE==='public'?'':`<button class="ecr-x" onclick="event.stopPropagation();ecrStop()" aria-label="Fermer l'écran">✕</button>`}</div>
+  <div class="ecr-b">
+   ${h?`<section class="ecr-now${neuf?' flash':''}" style="--c:${s.col}"><div class="k">Numéro appelé</div><div class="num">${tnum(h)}</div><div class="g">Guichet ${h.g}</div><div class="sv">${esc(s.nom)}</div></section>`
+     :`<section class="ecr-now"><div class="k">Bienvenue</div><div class="sv" style="font-size:clamp(20px,5vmin,70px)">Prenez un ticket à l'accueil</div></section>`}
+   <div class="ecr-side">
+    <section class="ecr-p" style="flex:1.4"><h2>Derniers appels</h2><div class="ecr-last">${C.slice(1,5).map(t=>`<div style="--c:${svcOf(t.svc).col}"><i></i>${tnum(t)}<span>Guichet ${t.g}</span></div>`).join('')||'<div style="font-size:clamp(14px,2.6vmin,36px);color:#B7B3DA;background:none">—</div>'}</div></section>
+    <section class="ecr-p"><h2>En attente</h2><div class="ecr-wait">${S.svcs.map(sv=>`<div><span class="dot" style="--c:${sv.col}"></span>${esc(sv.nom)}<b>${waiting([sv.l]).length}</b></div>`).join('')}</div></section>
+   </div></div>
+  <div class="ecr-f">🎫 Gardez votre ticket et regardez l'écran · <b>Merci de votre patience</b>${netErr?' · ⚠️ connexion':''}</div></div>`}
+/* Démo : sur un seul téléphone, l'écran peut appeler lui-même pour entendre la voix */
+let demoG=0;function demoAppel(){unlockAudio();const old=S.g.n,olds=S.g.svcs;demoG=demoG%S.set.guichets+1;S.g.n=demoG;S.g.svcs=S.svcs.map(s=>s.l);
+  if(!waiting().length){const l=S.svcs[Math.floor(Math.random()*S.svcs.length)].l,n=today().filter(t=>t.svc===l).reduce((m,t)=>Math.max(m,t.n),0)+1;S.tk.push({id:uid(),svc:l,n,t:new Date().toISOString(),st:'attente',g:0,tc:null,tf:null})}
+  suivant(false);S.g.n=old;S.g.svcs=olds;save()}
+
+/* Mon ticket (téléphone du client) */
+let monId=null;
+function monTicket(){if(MODE==='public')return S.tk.find(x=>x.id===MOI);return S.tk.find(x=>x.id===(monId||S.mine[0]))}
+function vTicket(){const t=monTicket();
+  if(!t)return `<h2>Mon ticket</h2><section class="card"><div>${MODE==='public'&&MOI?'Ticket introuvable ou terminé.':'Vous n\'avez pas encore de ticket.'}</div><div class="muted">Prenez un ticket à l'accueil, ou scannez le QR code de l'établissement.</div><button class="btn" onclick="${MODE==='public'?"PUBV='prendre';render()":"go('accueil')"}">Prendre un ticket</button></section>`;
+  const s=svcOf(t.svc),n=avant(t),e=estim(t),cur=calls().find(x=>x.svc===t.svc);
+  const body=t.st==='appel'?`<div class="big">C'est votre tour !</div><div style="font-size:22px;font-weight:800;background:#fff;color:${s.col};border-radius:12px;padding:4px 16px">Guichet ${t.g}</div>`
+    :t.st==='attente'?`<div class="big">${n?`${n} personne${n>1?'s':''} avant vous`:'Vous êtes le prochain'}</div><div>${n?`Environ ${e} min d'attente`:'Restez près du guichet'}</div>`
+    :t.st==='absent'?`<div class="big">Vous étiez absent</div><div>Prenez un nouveau ticket.</div>`:`<div class="big">Merci de votre visite</div>`;
+  return `<h2>Mon ticket</h2>
+  <section class="mt${t.st==='appel'?' call':''}" style="--c:${s.col}"><div style="font-weight:700">${esc(S.set.nom)} · ${esc(s.nom)}</div><div class="num">${tnum(t)}</div>${body}</section>
+  ${t.st==='attente'?`<section class="card"><div class="row between"><span class="muted">Numéro appelé maintenant</span><b style="font-size:22px">${cur?tnum(cur):'—'}</b></div>
+   <div class="muted" style="font-size:14px">Gardez cette page ouverte : le téléphone sonne et vibre quand votre numéro est appelé.</div>
+   ${S.set.son&&!audioOk()?'<button class="btn alt" onclick="unlockAudio();render()">🔈 Activer le son</button>':''}</section>`:''}
+  ${MODE==='public'&&(t.st==='fini'||t.st==='absent')?`<button class="btn" onclick="PUBV='prendre';render()">Prendre un nouveau ticket</button>`:''}
+  ${isDemo()&&S.mine.length>1?`<section class="card"><div class="lbl">Mes tickets d'aujourd'hui</div><div class="chips">${S.mine.map(id=>S.tk.find(x=>x.id===id)).filter(x=>x&&dk(x.t)===dk(new Date())).map(x=>`<button class="chip ${x.id===t.id?'on':''}" onclick="monId='${x.id}';render()">${tnum(x)}</button>`).join('')}</div></section>`:''}`}
+
+/* Bilan + réglages */
+function vPlus(){if(sub==='reglages')return vReglages();
+  const T=today(),fin=T.filter(t=>t.st==='fini'),abs=T.filter(t=>t.st==='absent'),att=T.filter(t=>t.st==='attente');
+  const avg=(L,f)=>L.length?Math.round(L.reduce((s,t)=>s+f(t),0)/L.length/60000):0;
+  const wait=avg(T.filter(t=>t.tc),t=>new Date(t.tc)-new Date(t.t)),serv=avg(fin.filter(t=>t.tf),t=>new Date(t.tf)-new Date(t.tc));
+  const G=Array.from({length:S.set.guichets},(_,i)=>i+1);
+  return `<div class="row between"><h2>Bilan du jour</h2><button class="btn sm ghost" onclick="sub='reglages';render()">⚙️ Réglages</button></div>
+  ${MODE==='owner'?`<section class="card"><div class="lbl">Liens de votre établissement</div>
+   <div class="grid2"><button class="btn alt" onclick="qrAccueil()">📱 QR code clients</button><button class="btn alt" onclick="lienTV()">📺 Lien écran TV</button></div>
+   <div class="muted" style="font-size:14px">Code de l'établissement : <b>${esc(CODE)}</b></div></section>`:''}
+  <div class="stat"><div><b>${T.length}</b><span>Tickets</span></div><div><b>${fin.length}</b><span>Servis</span></div><div><b>${att.length}</b><span>En attente</span></div><div><b>${abs.length}</b><span>Absents</span></div><div><b>${wait} min</b><span>Attente moyenne</span></div><div><b>${serv} min</b><span>Temps au guichet</span></div></div>
+  <section class="card"><div class="lbl">Par service</div><table><tr><th>Service</th><th class="n">Tickets</th><th class="n">Servis</th><th class="n">Attente</th></tr>
+   ${S.svcs.map(s=>{const L=T.filter(t=>t.svc===s.l);return `<tr><td><span class="dot" style="--c:${s.col}"></span> ${esc(s.nom)}</td><td class="n">${L.length}</td><td class="n">${L.filter(t=>t.st==='fini').length}</td><td class="n">${avg(L.filter(t=>t.tc),t=>new Date(t.tc)-new Date(t.t))} min</td></tr>`}).join('')}</table></section>
+  <section class="card"><div class="lbl">Par guichet</div><table><tr><th>Guichet</th><th class="n">Clients servis</th><th class="n">Temps moyen</th></tr>
+   ${G.map(g=>{const L=fin.filter(t=>t.g===g);return `<tr><td>Guichet ${g}</td><td class="n">${L.length}</td><td class="n">${avg(L.filter(t=>t.tf),t=>new Date(t.tf)-new Date(t.tc))} min</td></tr>`}).join('')}</table></section>`}
+function lienTV(){const u=lienEcran();modal(`<h2>Lien de l'écran TV</h2><div class="muted">Ouvrez ce lien dans le navigateur de la télé (Smart TV) ou d'un téléphone branché à la télé. Pas besoin de mot de passe : l'écran montre seulement les numéros.</div>
+  <div class="weblink">${esc(u)}</div><div style="background:#fff;border-radius:16px;padding:16px;max-width:220px;margin:0 auto;width:100%">${qrSvg(u,5)}</div>
+  <div class="grid2"><button class="btn alt" onclick="copier('${esc(u)}')">Copier le lien</button><button class="btn" onclick="closeM()">OK</button></div>`)}
+function vReglages(){
+  return `<div class="row"><button class="btn sm ghost" onclick="sub=null;render()">← Bilan</button></div><h2>Réglages</h2>
+  <section class="card"><label class="f">Nom de l'établissement<input id="r_nom" value="${esc(S.set.nom)}"></label>
+   <label class="f">Nombre de guichets<select id="r_g">${[1,2,3,4,5,6,8,10,12,15,20].map(n=>`<option ${n===S.set.guichets?'selected':''}>${n}</option>`).join('')}</select></label>
+   <button class="btn" onclick="saveSet()">Enregistrer</button></section>
+  <section class="card"><div class="lbl">Vos services (jusqu'à 6)</div><div class="muted" style="font-size:14px">Chaque établissement écrit ses propres services. Ce sont les boutons que les clients touchent à l'accueil.</div>
+   ${S.svcs.map((s,i)=>`<div class="svrow"><span class="l" style="background:${s.col}">${s.l}</span><input id="sv_${i}" value="${esc(s.nom)}" aria-label="Nom du service ${s.l}"><button class="btn bad sm" onclick="delSvc(${i})" aria-label="Supprimer">✕</button></div>`).join('')}
+   <div class="grid2">${S.svcs.length<6?'<button class="btn alt" onclick="addSvc()">+ Ajouter un service</button>':''}<button class="btn" onclick="saveSvcs()">Enregistrer les services</button></div></section>
+  <section class="card"><div class="lbl">Ticket papier</div>
+   <div class="opt">${[['non','Non, seulement le QR code','Le client scanne le QR code au mur et suit son tour sur son téléphone. Pas besoin d\'imprimante.'],
+     ['bouton','Oui, avec le bouton « Imprimer »','Marche avec toutes les imprimantes. Le téléphone demande de confirmer à chaque ticket.'],
+     ['auto','Oui, automatique (Android + RawBT)','Le ticket sort tout seul quand le client touche son service. Pour l\'entrée avec beaucoup de monde.']].map(([k,a,b])=>`<button class="${S.set.imp===k?'on':''}" onclick="setImp('${k}')"><b>${a}</b><small>${b}</small></button>`).join('')}</div>
+   ${S.set.imp!=='non'?`<label class="f">Largeur du papier<select onchange="S.set.larg=+this.value;pushSet()"><option value="58" ${S.set.larg!==80?'selected':''}>58 mm (petite imprimante)</option><option value="80" ${S.set.larg===80?'selected':''}>80 mm (grande imprimante)</option></select></label>`:''}
+   ${S.set.imp==='auto'?`<div class="guide" style="background:transparent"><b>Installer l'impression automatique</b><ol>
+     <li>Prenez une <b>tablette ou un téléphone Android</b> pour l'accueil.</li>
+     <li>Installez l'application gratuite <b>RawBT</b> depuis le Play Store.</li>
+     <li>Dans RawBT, choisissez votre imprimante (Bluetooth, USB ou Wi-Fi) et faites une impression d'essai.</li>
+     <li>Revenez ici et touchez <b>Tester l'impression</b>. La première fois, Android demande d'ouvrir avec RawBT : choisissez <b>Toujours</b>.</li></ol></div>`:''}
+   ${S.set.imp!=='non'?'<button class="btn alt" onclick="testImp()">🖨️ Tester l\'impression</button>':''}</section>
+  <section class="card"><div class="lbl">Modèles prêts</div><div class="muted" style="font-size:14px">Un clic remplit les services. Vous pouvez tout changer après.</div>
+   <div class="grid2">${Object.entries(PRESETS).filter(([k])=>k!=='autre').map(([k,p])=>`<button class="btn ghost" onclick="preset('${k}')">${p.t}</button>`).join('')}</div></section>
+  ${isDemo()?`<section class="card"><div class="lbl">Démo</div><div class="muted">Recommencez avec les tickets d'exemple.</div><button class="btn bad" onclick="resetDemo()">Remettre la démo à zéro</button><button class="btn ghost" onclick="exitDemo()">Quitter la démo</button></section>`
+   :`<section class="card"><div class="lbl">Compte</div><div class="muted">Connecté : ${esc(USER&&USER.email?USER.email.split('@')[0]:'')}</div><button class="btn bad" onclick="logout()">Déconnecter cet appareil</button></section>`}`}
+async function setImp(k){S.set.imp=k;render();await pushSet();render()}
+async function saveSet(){S.set.nom=($('r_nom').value.trim()||'Mon établissement').slice(0,60);S.set.guichets=+$('r_g').value;if(S.g.n>S.set.guichets)S.g.n=1;save();if(await pushSet()){render();toast('Enregistré')}}
+function readSvcs(){S.svcs.forEach((s,i)=>{const el=$('sv_'+i);if(el)s.nom=(el.value.trim()||s.nom).slice(0,40)})}
+async function saveSvcs(){readSvcs();save();if(await pushSet()){render();toast('Services enregistrés')}}
+async function addSvc(){readSvcs();const l=[...LETTRES].find(x=>!S.svcs.some(s=>s.l===x));if(!l)return;S.svcs.push({l,nom:'Nouveau service',col:COLS[LETTRES.indexOf(l)]});S.g.svcs.push(l);save();await pushSet();render()}
+async function delSvc(i){if(S.svcs.length<2)return toast('Gardez au moins un service');readSvcs();const l=S.svcs[i].l;S.svcs.splice(i,1);S.g.svcs=S.g.svcs.filter(x=>x!==l);if(!S.g.svcs.length)S.g.svcs=[S.svcs[0].l];save();await pushSet();render()}
+async function preset(k){S.svcs=svcsDe(k);S.g.svcs=S.svcs.map(s=>s.l);if(isDemo())S.set.nom=PRESETS[k].nom;save();if(await pushSet()){render();toast('Modèle appliqué')}}
+function resetDemo(){S=seed();save();monId=null;sub=null;render();toast('Démo remise à zéro')}
+
+/* ---------- Annonces : écran TV, guichet (démo) et téléphone du client ---------- */
+let vu=null,monVu=null;
+function checkAnnonce(){const C=calls(),h=C[0],key=h?h.id+'|'+h.tc:'';
+  const mt=(MODE==='public'&&PUBV==='ticket')||(isDemo()&&tab==='ticket')?monTicket():null,mk=mt?mt.id+'|'+mt.st+'|'+(mt.tc||''):'';
+  if(vu===null){vu=key;monVu=mk;return}
+  if(mk!==monVu){monVu=mk;if(mt&&mt.st==='appel'){if(S.set.son){ding();setTimeout(()=>parler(`C'est votre tour. Guichet ${mt.g}.`),1500)}try{navigator.vibrate&&navigator.vibrate([400,200,400,200,400])}catch(e){}}}
+  if(key===vu)return;vu=key;if(!h||h.st!=='appel')return;
+  const ecran=(tab==='ecran'&&ecrOn)||(MODE==='public'&&PUBV==='ecran');
+  if(ecran||isDemo()&&tab==='guichet')annonce(h)}
+
+/* ---------- Démarrage ---------- */
+async function boot(){
+  loadP();S=emptyS();S.set.son=P.son!==false;if(P.g&&P.g.n)S.g.n=P.g.n;if(P.g&&Array.isArray(P.g.svcs))S.g.svcs=P.g.svcs;
+  const q=new URLSearchParams(location.search),c=(q.get('c')||q.get('ecran')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
+  let mode='';try{mode=localStorage.getItem('terangaFile_mode')||''}catch(e){}
+  if(!c&&(mode==='demo'||q.get('ticket')||q.get('prendre')||q.get('demo'))){startDemo();const id=q.get('ticket');if(id&&S.tk.some(t=>t.id===id)){monId=id;tab='ticket';render()}return}
+  render();
+  const t0=Date.now();while(!window.supabase&&Date.now()-t0<8000)await new Promise(r=>setTimeout(r,150));
+  if(!window.supabase){MODE='account';render();toast('Pas de connexion internet');return}
+  SB=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'terangaFile.auth'}});
+  if(c){CODE=c;MODE='public';
+    if(q.get('ecran')){PUBV='ecran';ecrOn=true}
+    else{const id=q.get('t'),k=q.get('k');if(id&&k){P.mine=[{code:c,id,token:k},...P.mine.filter(x=>x.id!==id)].slice(0,10);saveP();MOI=id;PUBV='ticket'}
+      else{const m=P.mine.find(x=>x.code===c&&x.jour===new Date().toISOString().slice(0,10));if(m)MOI=m.id;PUBV='prendre'}}
+    await refresh(true);if(PUBV==='ticket'&&!monTicket())PUBV='prendre';render();return}
+  try{const{data}=await SB.auth.getSession();USER=data&&data.session?data.session.user:null}catch(e){USER=null}
+  if(!USER){MODE='account';render();return}
+  MODE='owner';ROLE=P.role||'';tab=ROLE==='guichet'?'guichet':ROLE==='resp'?'plus':'accueil';
+  await refresh(true);if(ROLE==='ecran'){go('ecran');return}render()}
+boot();
+setInterval(()=>{if(isDemo())softRender();else refresh(false)},3000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){wake();if(!isDemo())refresh(true)}});
+window.addEventListener('storage',e=>{if(e.key===KEY&&isDemo()){loadDemo();softRender()}});
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)borne=false});
+</script>
+</body>
+</html>
