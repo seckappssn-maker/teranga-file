@@ -142,7 +142,7 @@ td.n,th.n{text-align:right}
 .ecr-clk{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,4.6vmin,70px);color:#DDD9FF}
 .ecr-x{background:none;border:1px solid #ffffff2e;color:#ffffff99;border-radius:999px;padding:6px 14px;font-size:15px;cursor:pointer}
 .ecr-snd{background:#F59E0B;color:#1A1200;border:0;border-radius:999px;padding:8px 16px;font-weight:800;font-size:clamp(13px,1.8vmin,22px);cursor:pointer}
-.ecr-b{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:2.4vmin;min-height:0}
+.ecr-b{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:2.4vmin;min-height:0}
 .ecr-now{border-radius:3vmin;background:var(--c,#3B2FB0);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1vmin;padding:2vmin;text-align:center;position:relative;overflow:hidden}
 .ecr-now .k{font-weight:800;letter-spacing:.18em;text-transform:uppercase;font-size:clamp(14px,2.6vmin,40px);opacity:.9}
 .ecr-now .num{font-family:var(--f-display);font-weight:800;font-size:clamp(80px,26vmin,420px);line-height:.95}
@@ -153,14 +153,16 @@ td.n,th.n{text-align:right}
 .ecr-side{display:flex;flex-direction:column;gap:2vmin;min-height:0}
 .ecr-p{background:#1A1733;border:2px solid #ffffff1a;border-radius:3vmin;padding:2vmin 2.4vmin;display:flex;flex-direction:column;gap:1.2vmin;min-height:0;overflow:hidden}
 .ecr-p h2{font-size:clamp(18px,3.4vmin,52px);color:#C9C4FF}
-.ecr-last{display:flex;flex-direction:column;gap:1vmin}
-.ecr-last div{display:flex;align-items:center;justify-content:space-between;gap:2vmin;background:#ffffff0d;border-radius:1.6vmin;padding:.8vmin 1.6vmin;font-family:var(--f-display);font-weight:800;font-size:clamp(20px,4.4vmin,70px)}
-.ecr-last div span{font-size:.6em;color:#C9C4FF}
-.ecr-last div i{font-style:normal;width:1.4vmin;align-self:stretch;border-radius:1vmin;background:var(--c)}
-.ecr-wait{display:flex;flex-direction:column;gap:1vmin}
-.ecr-wait div{display:flex;align-items:center;gap:1.6vmin;font-size:clamp(14px,2.8vmin,42px);font-weight:700}
-.ecr-wait div b{margin-left:auto;font-family:var(--f-display);font-size:1.25em}
-.ecr-wait .dot{width:2vmin;height:2vmin}
+.ecr-last{flex:1;min-height:0;display:grid;grid-template-rows:repeat(4,minmax(0,1fr));gap:1.2vmin}
+.ecr-last>div{display:flex;align-items:center;gap:2vmin;background:#ffffff12;border-radius:1.8vmin;padding:0 2vmin;font-family:var(--f-display);font-weight:800;font-size:clamp(26px,7.4vmin,120px);line-height:1;min-height:0;overflow:hidden}
+.ecr-last>div span{margin-left:auto;font-size:.62em;color:#E4E0FF;white-space:nowrap}
+.ecr-last>div i{font-style:normal;width:1.6vmin;height:60%;border-radius:1vmin;background:var(--c);flex:none}
+.ecr-wait{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1vmin 2vmin}
+.ecr-wait div{display:flex;align-items:center;gap:1.2vmin;font-size:clamp(13px,2.4vmin,38px);font-weight:700;min-width:0}
+.ecr-wait div em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ecr-wait div b{margin-left:auto;font-family:var(--f-display);font-size:1.3em}
+.ecr-wait .dot{width:1.8vmin;height:1.8vmin;flex:none}
+.ecr-fs{background:#ffffff1f;color:#fff;border:1px solid #ffffff40;border-radius:999px;padding:8px 16px;font-weight:800;font-size:clamp(13px,1.8vmin,22px);cursor:pointer}
 .ecr-demo{background:#F59E0B;color:#1A1200;border:0;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap}
 .ecr-f{display:flex;align-items:center;justify-content:center;gap:2vmin;color:#B7B3DA;font-size:clamp(14px,2.6vmin,38px);font-weight:600;text-align:center}
 .ecr-f b{color:#fff}
@@ -494,18 +496,23 @@ function wake(){try{if(navigator.wakeLock&&!wakeLk&&document.visibilityState==='
 function ecrStop(){ecrOn=false;try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}try{wakeLk&&wakeLk.release()}catch(e){}
   if(MODE==='owner'&&ROLE==='ecran'){roleMenu();return}go(isDemo()||ROLE==='resp'?'guichet':'accueil')}
 function vEcran(){if(MODE!=='public'&&!ecrOn)return '';const C=calls(),h=C[0],s=h?svcOf(h.svc):null,d=new Date(),neuf=h&&Date.now()-new Date(h.tc)<6000;
-  return `<div class="ecr" onclick="unlockAudio();wake()">
+  return `<div class="ecr" onclick="unlockAudio();wake();pleinEcran()">
   <div class="ecr-h"><h1>${esc(S.set.nom)}<small>File d'attente</small></h1>
    ${S.set.son&&!audioOk()?`<button class="ecr-snd" onclick="unlockAudio();render()">🔈 Touchez pour le son</button>`:''}
+   ${fsOk()&&!document.fullscreenElement&&!document.webkitFullscreenElement?`<button class="ecr-fs" onclick="event.stopPropagation();unlockAudio();pleinEcran()">⛶ Plein écran</button>`:''}
    ${isDemo()?`<button class="ecr-demo" onclick="event.stopPropagation();demoAppel()">▶ Démo : appeler</button>`:''}<span class="ecr-clk">${hm(d)}</span>${MODE==='public'?'':`<button class="ecr-x" onclick="event.stopPropagation();ecrStop()" aria-label="Fermer l'écran">✕</button>`}</div>
   <div class="ecr-b">
    ${h?`<section class="ecr-now${neuf?' flash':''}" style="--c:${s.col}"><div class="k">Numéro appelé</div><div class="num">${tnum(h)}</div><div class="g">Guichet ${h.g}</div><div class="sv">${esc(s.nom)}</div></section>`
      :`<section class="ecr-now"><div class="k">Bienvenue</div><div class="sv" style="font-size:clamp(20px,5vmin,70px)">Prenez un ticket à l'accueil</div></section>`}
    <div class="ecr-side">
-    <section class="ecr-p" style="flex:1.4"><h2>Derniers appels</h2><div class="ecr-last">${C.slice(1,5).map(t=>`<div style="--c:${svcOf(t.svc).col}"><i></i>${tnum(t)}<span>Guichet ${t.g}</span></div>`).join('')||'<div style="font-size:clamp(14px,2.6vmin,36px);color:#B7B3DA;background:none">—</div>'}</div></section>
-    <section class="ecr-p"><h2>En attente</h2><div class="ecr-wait">${S.svcs.map(sv=>`<div><span class="dot" style="--c:${sv.col}"></span>${esc(sv.nom)}<b>${waiting([sv.l]).length}</b></div>`).join('')}</div></section>
+    <section class="ecr-p" style="flex:2.6"><h2>Derniers appels</h2><div class="ecr-last">${C.slice(1,5).map(t=>`<div style="--c:${svcOf(t.svc).col}"><i></i>${tnum(t)}<span>Guichet ${t.g}</span></div>`).join('')||'<div style="font-size:clamp(14px,2.6vmin,36px);color:#B7B3DA;background:none">—</div>'}</div></section>
+    <section class="ecr-p"><h2>En attente</h2><div class="ecr-wait">${S.svcs.map(sv=>`<div><span class="dot" style="--c:${sv.col}"></span><em>${esc(sv.nom)}</em><b>${waiting([sv.l]).length}</b></div>`).join('')}</div></section>
    </div></div>
   <div class="ecr-f">🎫 Gardez votre ticket et regardez l'écran · <b>Merci de votre patience</b>${netErr?' · ⚠️ connexion':''}</div></div>`}
+const fsOk=()=>!!(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen);
+function pleinEcran(){try{if(document.fullscreenElement||document.webkitFullscreenElement)return;const d=document.documentElement,f=d.requestFullscreen||d.webkitRequestFullscreen;
+  if(f){const r=f.call(d);if(r&&r.then)r.then(()=>setTimeout(softRender,300)).catch(()=>{});else setTimeout(softRender,300)}}catch(e){}}
+document.addEventListener('fullscreenchange',()=>setTimeout(softRender,100));
 /* Démo : sur un seul téléphone, l'écran peut appeler lui-même pour entendre la voix */
 let demoG=0;function demoAppel(){unlockAudio();const old=S.g.n,olds=S.g.svcs;demoG=demoG%S.set.guichets+1;S.g.n=demoG;S.g.svcs=S.svcs.map(s=>s.l);
   if(!waiting().length){const l=S.svcs[Math.floor(Math.random()*S.svcs.length)].l,n=today().filter(t=>t.svc===l).reduce((m,t)=>Math.max(m,t.n),0)+1;S.tk.push({id:uid(),svc:l,n,t:new Date().toISOString(),st:'attente',g:0,tc:null,tf:null})}
