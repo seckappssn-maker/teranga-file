@@ -420,8 +420,8 @@ function vAccueil(){
   ${svcBtns()}
   ${ROLE==='accueil'?'':`<section class="card"><div class="lbl">Pour le responsable</div>
    <div class="muted">Posez une tablette à l'entrée avec le rôle « Accueil ». Les clients touchent leur service : le ticket s'imprime, ou ils scannent le QR code pour suivre leur tour sur leur téléphone.</div>
-   <div class="grid2"><button class="btn alt" onclick="borneOn()">⛶ Plein écran</button><button class="btn ghost" onclick="qrAccueil()">QR code à afficher</button></div></section>`}
-  ${ROLE==='accueil'?`<button class="btn alt" onclick="borneOn()">⛶ Plein écran</button>`:''}`}
+   <div class="grid2">${appMode()?'':'<button class="btn alt" onclick="borneOn()">⛶ Plein écran</button>'}<button class="btn ghost" onclick="qrAccueil()">QR code à afficher</button></div></section>`}
+  ${ROLE==='accueil'&&!appMode()?`<button class="btn alt" onclick="borneOn()">⛶ Plein écran</button>`:''}`}
 function svcBtns(){return `<div class="svcs">${S.svcs.map(s=>{const n=waiting([s.l]).length;return `<button class="svc" style="--c:${s.col}" onclick="unlockAudio();prendre('${s.l}')"><span class="l">${s.l}</span><b>${esc(s.nom)}</b><small>${n?n+' en attente':'Pas d\'attente'}</small></button>`}).join('')}</div>`}
 function borneOn(){borne=true;unlockAudio();
   if(fsOk()){pleinEcran();toast('Plein écran : touchez la touche retour pour quitter');return}
@@ -510,7 +510,7 @@ function vEcran(){if(MODE!=='public'&&!ecrOn)return '';const C=calls(),h=C[0],s=
   return `<div class="ecr" onclick="unlockAudio();wake();pleinEcran()">
   <div class="ecr-h"><h1>${esc(S.set.nom)}<small>File d'attente</small></h1>
    ${S.set.son&&!audioOk()?`<button class="ecr-snd" onclick="unlockAudio();render()">🔈 Touchez pour le son</button>`:''}
-   ${fsOk()&&!document.fullscreenElement&&!document.webkitFullscreenElement?`<button class="ecr-fs" onclick="event.stopPropagation();unlockAudio();pleinEcran()">⛶ Plein écran</button>`:''}
+   ${fsOk()&&!appMode()&&!document.fullscreenElement&&!document.webkitFullscreenElement?`<button class="ecr-fs" onclick="event.stopPropagation();unlockAudio();pleinEcran()">⛶ Plein écran</button>`:''}
    ${isDemo()?`<button class="ecr-demo" onclick="event.stopPropagation();demoAppel()">▶ Démo : appeler</button>`:''}<span class="ecr-clk">${hm(d)}</span>${MODE==='public'?'':`<button class="ecr-x" onclick="event.stopPropagation();ecrStop()" aria-label="Fermer l'écran">✕</button>`}</div>
   <div class="ecr-b">
    ${h?`<section class="ecr-now${neuf?' flash':''}" style="--c:${s.col}"><div class="k">Numéro appelé</div><div class="num">${tnum(h)}</div><div class="g">Guichet ${h.g}</div><div class="sv">${esc(s.nom)}</div></section>`
@@ -521,6 +521,7 @@ function vEcran(){if(MODE!=='public'&&!ecrOn)return '';const C=calls(),h=C[0],s=
    </div></div>
   <div class="ecr-f">🎫 Gardez votre ticket et regardez l'écran · <b>Merci de votre patience</b>${netErr?' · ⚠️ connexion':''}</div></div>`}
 const fsOk=()=>!!(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen);
+const appMode=()=>!!(window.navigator.standalone||(window.matchMedia&&(matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches)));
 function pleinEcran(){try{if(document.fullscreenElement||document.webkitFullscreenElement)return;const d=document.documentElement,f=d.requestFullscreen||d.webkitRequestFullscreen;
   if(f){const r=f.call(d);if(r&&r.then)r.then(()=>setTimeout(softRender,300)).catch(()=>{});else setTimeout(softRender,300)}}catch(e){}}
 document.addEventListener('fullscreenchange',()=>setTimeout(softRender,100));
