@@ -286,6 +286,25 @@ async function refresh(force){if(busy||!SB||MODE==='demo'||MODE==='boot'||MODE==
   finally{busy=false}
   softRender()}
 async function rpc(name,args){if(!SB)throw new Error('hors ligne');const r=await SB.rpc(name,args);if(r.error)throw r.error;return r.data}
+/* ---------- Notifications au client (téléphone fermé) ---------- */
+const PUSH_PUB='BLcHXOxXIRWkIBKizjrAQ0pRpNURUxUGiIlzYgHCGH-aAKLeiGsoL_thiuzOrPAUaF6lWhgOtBFTajqAcmO6sB8';
+const pushOk=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+function pushB64(s){s=String(s).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
+let pushBusy=false;
+async function prevenir(){if(pushBusy)return;unlockAudio();
+  if(!pushOk()){modal(`<h2>Notifications</h2><div class="muted">Ce téléphone ne peut pas recevoir de notifications depuis une page web${/iPhone|iPad/.test(navigator.userAgent)?' (iPhone : il faut d\'abord ajouter la page à l\'écran d\'accueil)':''}.</div><div><b>Gardez cette page ouverte</b> : le téléphone sonne et vibre quand votre numéro est appelé. Et regardez l'écran dans la salle.</div><button class="btn" onclick="closeM()">OK</button>`);return}
+  const m=P.mine.find(x=>x.code===CODE&&x.id===MOI);if(!m)return;pushBusy=true;render();
+  try{const perm=await Notification.requestPermission();if(perm!=='granted'){toast('Notifications refusées : gardez la page ouverte');return}
+    const reg=await navigator.serviceWorker.register('sw.js');await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:pushB64(PUSH_PUB)});
+    const ok=await rpc('file_push_save',{p_code:CODE,p_id:+m.id,p_token:m.token,p_sub:sub.toJSON()});
+    if(!ok)throw new Error('Ticket terminé');
+    m.notif=true;saveP();toast('✅ Vous serez prévenu, même téléphone fermé')}
+  catch(e){toast(errMsg(e))}finally{pushBusy=false;render()}}
+function pushCard(t){if(MODE!=='public'||!(t.st==='attente'||t.st==='appel'))return '';const m=P.mine.find(x=>x.code===CODE&&x.id===MOI);
+  if(m&&m.notif&&pushOk()&&Notification.permission==='granted')return `<section class="card" style="border-color:var(--ok)"><b>🔔 Notification activée</b><div class="muted" style="font-size:14px">Votre téléphone vous prévient quand vous êtes le prochain et quand c'est votre tour, même s'il est fermé.</div></section>`;
+  if(!pushOk())return `<section class="card"><b>📱 Gardez cette page ouverte</b><div class="muted" style="font-size:14px">Le téléphone sonne et vibre quand c'est votre tour.${/iPhone|iPad/.test(navigator.userAgent)?' Sur iPhone, les notifications marchent seulement si la page est ajoutée à l\'écran d\'accueil.':''}</div></section>`;
+  return `<section class="card" style="border-color:var(--brand)"><b>🔔 Être prévenu même téléphone fermé</b><div class="muted" style="font-size:14px">Vous pouvez fermer le téléphone ou sortir : il sonne quand vous êtes le prochain et quand c'est votre tour.</div><button class="btn full" onclick="prevenir()" ${pushBusy?'disabled':''}>${pushBusy?'Un instant…':'🔔 Prévenez-moi'}</button></section>`}
 const errMsg=e=>/fetch|network|Failed/i.test(String(e&&e.message))?'Pas de connexion internet : réessayez':String(e&&e.message||e);
 
 /* ---------- Son : ding + voix ---------- */
@@ -541,6 +560,7 @@ function vTicket(){const t=monTicket();
     :t.st==='absent'?`<div class="big">Vous étiez absent</div><div>Prenez un nouveau ticket.</div>`:`<div class="big">Merci de votre visite</div>`;
   return `<h2>Mon ticket</h2>
   <section class="mt${t.st==='appel'?' call':''}" style="--c:${s.col}"><div style="font-weight:700">${esc(S.set.nom)} · ${esc(s.nom)}</div><div class="num">${tnum(t)}</div>${body}</section>
+  ${pushCard(t)}
   ${t.st==='attente'?`<section class="card"><div class="row between"><span class="muted">Numéro appelé maintenant</span><b style="font-size:22px">${cur?tnum(cur):'—'}</b></div>
    <div class="muted" style="font-size:14px">Gardez cette page ouverte : le téléphone sonne et vibre quand votre numéro est appelé.</div>
    ${S.set.son&&!audioOk()?'<button class="btn alt" onclick="unlockAudio();render()">🔈 Activer le son</button>':''}</section>`:''}
@@ -598,11 +618,12 @@ async function preset(k){S.svcs=svcsDe(k);S.g.svcs=S.svcs.map(s=>s.l);if(isDemo(
 function resetDemo(){S=seed();save();monId=null;sub=null;render();toast('Démo remise à zéro')}
 
 /* ---------- Annonces : écran TV, guichet (démo) et téléphone du client ---------- */
-let vu=null,monVu=null;
+let vu=null,monVu=null,monProchain=null;
 function checkAnnonce(){const C=calls(),h=C[0],key=h?h.id+'|'+h.tc:'';
   const mt=(MODE==='public'&&PUBV==='ticket')||(isDemo()&&tab==='ticket')?monTicket():null,mk=mt?mt.id+'|'+mt.st+'|'+(mt.tc||''):'';
   if(vu===null){vu=key;monVu=mk;return}
-  if(mk!==monVu){monVu=mk;if(mt&&mt.st==='appel'){if(S.set.son){ding();setTimeout(()=>parler(`C'est votre tour. Guichet ${mt.g}.`),1500)}try{navigator.vibrate&&navigator.vibrate([400,200,400,200,400])}catch(e){}}}
+  if(mk!==monVu){monVu=mk;if(mt&&mt.st==='appel'){if(S.set.son){ding();setTimeout(ding,900);setTimeout(()=>parler(`C'est votre tour. Numéro ${parle(mt)}. Guichet ${mt.g}.`),2000)}try{navigator.vibrate&&navigator.vibrate([600,200,600,200,900])}catch(e){}}}
+  if(mt&&mt.st==='attente'){const nb=avant(mt),k=mt.id+'|'+nb;if(monProchain&&monProchain.startsWith(mt.id+'|')&&nb===0&&monProchain!==k){if(S.set.son)ding();try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}}monProchain=k}
   if(key===vu)return;vu=key;if(!h||h.st!=='appel')return;
   const ecran=(tab==='ecran'&&ecrOn)||(MODE==='public'&&PUBV==='ecran');
   if(ecran||isDemo()&&tab==='guichet')annonce(h)}
