@@ -20,7 +20,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Teranga File">
-<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
 <style>
@@ -634,13 +633,14 @@ async function boot(){
   const q=new URLSearchParams(location.search),c=(q.get('c')||q.get('ecran')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
   let mode='';try{mode=localStorage.getItem('terangaFile_mode')||''}catch(e){}
   if(!c&&(mode==='demo'||q.get('ticket')||q.get('prendre')||q.get('demo'))){startDemo();const id=q.get('ticket');if(id&&S.tk.some(t=>t.id===id)){monId=id;tab='ticket';render()}return}
+  if(!c){try{const l=document.createElement('link');l.rel='manifest';l.href='manifest.json';document.head.appendChild(l)}catch(e){}}
   render();
   const t0=Date.now();while(!window.supabase&&Date.now()-t0<8000)await new Promise(r=>setTimeout(r,150));
   if(!window.supabase){MODE='account';render();toast('Pas de connexion internet');return}
   SB=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'terangaFile.auth'}});
   if(c){CODE=c;MODE='public';
     /* Page client ou écran TV : si on l'ajoute à l'écran d'accueil, l'icône doit rouvrir CETTE page (avec le code), pas la connexion */
-    try{const mf=document.querySelector('link[rel="manifest"]');if(mf)mf.remove()}catch(e){}
+
     if(q.get('ecran')){PUBV='ecran';ecrOn=true}
     else{const id=q.get('t'),k=q.get('k');if(id&&k){P.mine=[{code:c,id,token:k},...P.mine.filter(x=>x.id!==id)].slice(0,10);saveP();MOI=id;PUBV='ticket'}
       else{const m=P.mine.find(x=>x.code===c&&x.jour===new Date().toISOString().slice(0,10));if(m)MOI=m.id;PUBV='prendre'}}
