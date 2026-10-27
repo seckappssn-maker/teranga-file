@@ -524,8 +524,13 @@ function ecrStart(){ecrOn=true;unlockAudio();try{const d=document.documentElemen
 function wake(){try{if(navigator.wakeLock&&!wakeLk&&document.visibilityState==='visible')navigator.wakeLock.request('screen').then(l=>{wakeLk=l;l.addEventListener('release',()=>wakeLk=null)}).catch(()=>{})}catch(e){}}
 function ecrStop(){ecrOn=false;try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}try{wakeLk&&wakeLk.release()}catch(e){}
   if(MODE==='owner'&&ROLE==='ecran'){roleMenu();return}go(isDemo()||ROLE==='resp'?'guichet':'accueil')}
+let HOLD=null;
+/* Coin haut-gauche de l'écran TV : tenir 3 secondes pour revenir à la page de l'établissement */
+function ecrHoldStart(){clearTimeout(HOLD);HOLD=setTimeout(()=>{location.href=BASE},3000)}
+function ecrHoldEnd(){clearTimeout(HOLD);HOLD=null}
 function vEcran(){if(MODE!=='public'&&!ecrOn)return '';const C=calls(),h=C[0],s=h?svcOf(h.svc):null,d=new Date(),neuf=h&&Date.now()-new Date(h.tc)<6000;
   return `<div class="ecr" onclick="unlockAudio();wake();pleinEcran()">
+  ${MODE==='public'?`<div style="position:fixed;top:0;left:0;width:90px;height:90px;z-index:50" onpointerdown="ecrHoldStart()" onpointerup="ecrHoldEnd()" onpointerleave="ecrHoldEnd()" onpointercancel="ecrHoldEnd()" aria-hidden="true"></div>`:''}
   <div class="ecr-h"><h1>${esc(S.set.nom)}<small>File d'attente</small></h1>
    ${S.set.son&&!audioOk()?`<button class="ecr-snd" onclick="unlockAudio();render()">🔈 Touchez pour le son</button>`:''}
    ${fsOk()&&!appMode()&&!document.fullscreenElement&&!document.webkitFullscreenElement?`<button class="ecr-fs" onclick="event.stopPropagation();unlockAudio();pleinEcran()">⛶ Plein écran</button>`:''}
