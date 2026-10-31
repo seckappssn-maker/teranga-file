@@ -137,9 +137,14 @@ td.n,th.n{text-align:right}
 .svrow{display:grid;grid-template-columns:52px 1fr 52px;gap:8px;align-items:center}
 .svrow .l{font-family:var(--f-display);font-weight:800;font-size:22px;color:#fff;border-radius:12px;height:48px;display:grid;place-items:center}
 /* Écran TV */
-.ecr{position:fixed;inset:0;z-index:30;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:2.2vmin;padding:2.4vmin 3vmin;color:#fff;overflow:hidden;
+.ecr{position:fixed;inset:0;z-index:30;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:2.2vmin;color:#fff;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;
+  padding:calc(2.4vmin + env(safe-area-inset-top,0px)) calc(3vmin + env(safe-area-inset-right,0px)) calc(2.4vmin + env(safe-area-inset-bottom,0px)) calc(3vmin + env(safe-area-inset-left,0px));
   background:radial-gradient(ellipse 60% 55% at 85% 0%,#6D28D955,transparent 70%),radial-gradient(ellipse 50% 50% at 0% 100%,#0EA5E933,transparent 70%),#0D0B1E}
 .ecr-h{display:flex;align-items:center;gap:2vmin}
+#holdBar{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;background:#000c;color:#fff;border-radius:18px;padding:18px 22px;width:min(80vw,420px);text-align:center;font-weight:800;font-size:18px;pointer-events:none}
+#holdBar .hb-p{margin-top:12px;height:10px;border-radius:99px;background:#ffffff33;overflow:hidden}
+#holdBar .hb-p i{display:block;height:100%;width:0;background:#F59E0B;border-radius:99px;animation:hb 2.4s linear forwards}
+@keyframes hb{to{width:100%}}
 .ecr-h h1{flex:1;min-width:0;font-size:clamp(22px,5vmin,76px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ecr-h h1 small{display:block;font-family:var(--f-body);font-size:.36em;font-weight:700;color:#B7B3DA;letter-spacing:.16em;text-transform:uppercase}
 .ecr-clk{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,4.6vmin,70px);color:#DDD9FF}
@@ -524,13 +529,22 @@ function ecrStart(){ecrOn=true;unlockAudio();try{const d=document.documentElemen
 function wake(){try{if(navigator.wakeLock&&!wakeLk&&document.visibilityState==='visible')navigator.wakeLock.request('screen').then(l=>{wakeLk=l;l.addEventListener('release',()=>wakeLk=null)}).catch(()=>{})}catch(e){}}
 function ecrStop(){ecrOn=false;try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}try{wakeLk&&wakeLk.release()}catch(e){}
   if(MODE==='owner'&&ROLE==='ecran'){roleMenu();return}go(isDemo()||ROLE==='resp'?'guichet':'accueil')}
-let HOLD=null;
-/* Nom de la banque en haut de l'écran TV : tenir 3 secondes pour revenir à la page de l'établissement */
-function ecrHoldStart(){clearTimeout(HOLD);HOLD=setTimeout(()=>{location.href=BASE},3000)}
-function ecrHoldEnd(){clearTimeout(HOLD);HOLD=null}
+/* Écran TV : garder le doigt 3 secondes n'importe où sur l'écran pour sortir.
+   Écouté sur tout le document (l'écran se redessine toutes les 3 s), avec une barre qui se remplit pour voir que ça marche. */
+let HOLD=null,HOLDX=0,HOLDY=0;
+const ecrVisible=()=>!!document.querySelector('.ecr');
+function ecrQuit(){ecrHoldEnd();if(MODE==='public'){location.href=BASE;return}ecrStop()}
+function ecrHoldStart(x,y){if(!ecrVisible())return;ecrHoldEnd();HOLDX=x;HOLDY=y;
+  HOLD=setTimeout(()=>{const b=document.createElement('div');b.id='holdBar';b.innerHTML='<div class="hb-t">Gardez le doigt… pour quitter l\'écran</div><div class="hb-p"><i></i></div>';document.body.appendChild(b);
+    HOLD=setTimeout(ecrQuit,2400)},600)}
+function ecrHoldEnd(){clearTimeout(HOLD);HOLD=null;const b=document.getElementById('holdBar');if(b)b.remove()}
+document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('button'))return;ecrHoldStart(e.clientX,e.clientY)},true);
+document.addEventListener('pointermove',e=>{if(HOLD&&Math.hypot(e.clientX-HOLDX,e.clientY-HOLDY)>40)ecrHoldEnd()},true);
+['pointerup','pointercancel'].forEach(ev=>document.addEventListener(ev,ecrHoldEnd,true));
+document.addEventListener('contextmenu',e=>{if(ecrVisible())e.preventDefault()});
 function vEcran(){if(MODE!=='public'&&!ecrOn)return '';const C=calls(),h=C[0],s=h?svcOf(h.svc):null,d=new Date(),neuf=h&&Date.now()-new Date(h.tc)<6000;
   return `<div class="ecr" onclick="unlockAudio();wake();pleinEcran()">
-  <div class="ecr-h"><h1 ${MODE==='public'?'onpointerdown="ecrHoldStart()" onpointerup="ecrHoldEnd()" onpointerleave="ecrHoldEnd()" onpointercancel="ecrHoldEnd()"':''}>${esc(S.set.nom)}<small>File d'attente</small></h1>
+  <div class="ecr-h"><h1>${esc(S.set.nom)}<small>File d'attente</small></h1>
    ${S.set.son&&!audioOk()?`<button class="ecr-snd" onclick="unlockAudio();render()">🔈 Touchez pour le son</button>`:''}
    ${fsOk()&&!appMode()&&!document.fullscreenElement&&!document.webkitFullscreenElement?`<button class="ecr-fs" onclick="event.stopPropagation();unlockAudio();pleinEcran()">⛶ Plein écran</button>`:''}
    ${isDemo()?`<button class="ecr-demo" onclick="event.stopPropagation();demoAppel()">▶ Démo : appeler</button>`:''}<span class="ecr-clk">${hm(d)}</span>${MODE==='public'?'':`<button class="ecr-x" onclick="event.stopPropagation();ecrStop()" aria-label="Fermer l'écran">✕</button>`}</div>
@@ -585,7 +599,7 @@ function vPlus(){if(sub==='reglages')return vReglages();
    ${S.svcs.map(s=>{const L=T.filter(t=>t.svc===s.l);return `<tr><td><span class="dot" style="--c:${s.col}"></span> ${esc(s.nom)}</td><td class="n">${L.length}</td><td class="n">${L.filter(t=>t.st==='fini').length}</td><td class="n">${avg(L.filter(t=>t.tc),t=>new Date(t.tc)-new Date(t.t))} min</td></tr>`}).join('')}</table></section>
   <section class="card"><div class="lbl">Par guichet</div><table><tr><th>Guichet</th><th class="n">Clients servis</th><th class="n">Temps moyen</th></tr>
    ${G.map(g=>{const L=fin.filter(t=>t.g===g);return `<tr><td>Guichet ${g}</td><td class="n">${L.length}</td><td class="n">${avg(L.filter(t=>t.tf),t=>new Date(t.tf)-new Date(t.tc))} min</td></tr>`}).join('')}</table></section>`}
-function lienTV(){const u=lienEcran();modal(`<h2>Lien de l'écran TV</h2><div class="muted">Ouvrez ce lien dans le navigateur de la télé (Smart TV) ou d'un téléphone branché à la télé. Pas besoin de mot de passe : l'écran montre seulement les numéros.</div>
+function lienTV(){const u=lienEcran();modal(`<h2>Lien de l'écran TV</h2><div class="muted">Ouvrez ce lien dans le navigateur de la télé (Smart TV) ou d'un téléphone branché à la télé. Pas besoin de mot de passe : l'écran montre seulement les numéros.</div><div class="muted">👆 Pour quitter l'écran : <b>gardez le doigt 3 secondes</b> n'importe où sur l'écran.</div>
   <div class="weblink">${esc(u)}</div><div style="background:#fff;border-radius:16px;padding:16px;max-width:220px;margin:0 auto;width:100%">${qrSvg(u,5)}</div>
   <div class="grid2"><button class="btn alt" onclick="copier('${esc(u)}')">Copier le lien</button><button class="btn" onclick="closeM()">OK</button></div>`)}
 function vReglages(){
