@@ -542,12 +542,13 @@ document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closes
 document.addEventListener('pointermove',e=>{if(HOLD&&Math.hypot(e.clientX-HOLDX,e.clientY-HOLDY)>40)ecrHoldEnd()},true);
 ['pointerup','pointercancel'].forEach(ev=>document.addEventListener(ev,ecrHoldEnd,true));
 document.addEventListener('contextmenu',e=>{if(ecrVisible())e.preventDefault()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ecrVisible()&&MODE!=='public')ecrQuit()});
 function vEcran(){if(MODE!=='public'&&!ecrOn)return '';const C=calls(),h=C[0],s=h?svcOf(h.svc):null,d=new Date(),neuf=h&&Date.now()-new Date(h.tc)<6000;
   return `<div class="ecr" onclick="unlockAudio();wake();pleinEcran()">
   <div class="ecr-h"><h1>${esc(S.set.nom)}<small>File d'attente</small></h1>
    ${S.set.son&&!audioOk()?`<button class="ecr-snd" onclick="unlockAudio();render()">🔈 Touchez pour le son</button>`:''}
    ${fsOk()&&!appMode()&&!document.fullscreenElement&&!document.webkitFullscreenElement?`<button class="ecr-fs" onclick="event.stopPropagation();unlockAudio();pleinEcran()">⛶ Plein écran</button>`:''}
-   ${isDemo()?`<button class="ecr-demo" onclick="event.stopPropagation();demoAppel()">▶ Démo : appeler</button>`:''}<span class="ecr-clk">${hm(d)}</span>${MODE==='public'?'':`<button class="ecr-x" onclick="event.stopPropagation();ecrStop()" aria-label="Fermer l'écran">✕</button>`}</div>
+   ${isDemo()?`<button class="ecr-demo" onclick="event.stopPropagation();demoAppel()">▶ Démo : appeler</button>`:''}<span class="ecr-clk">${hm(d)}</span></div>
   <div class="ecr-b">
    ${h?`<section class="ecr-now${neuf?' flash':''}" style="--c:${s.col}"><div class="k">Numéro appelé</div><div class="num">${tnum(h)}</div><div class="g">Guichet ${h.g}</div><div class="sv">${esc(s.nom)}</div></section>`
      :`<section class="ecr-now"><div class="k">Bienvenue</div><div class="sv" style="font-size:clamp(20px,5vmin,70px)">Prenez un ticket à l'accueil</div></section>`}
